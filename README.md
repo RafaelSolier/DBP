@@ -51,6 +51,7 @@ Cada proveedor puede ofrecer múltiples servicios.
 * `descripción`
 * `tarifa`
 * `categoría`
+* `categoria` (como un enum: LIMPIEZA, PLOMERIA, ELECTRICISTA, CARPINTERIA, PINTURA, JARDINERIA, CUIDADOS)
 * `proveedorId` (FK)
 * `calificaciónPromedio`
 * `disponibilidadHoraria` (relación 1 a muchos con `Horario`)
@@ -67,19 +68,8 @@ Define los bloques horarios en los que un servicio está disponible.
 * `díaSemana`
 * `horaInicio`
 * `horaFin`
+
 * `servicioId` (FK)
-
----
-
-### 📚 Categoría
-
-Permite clasificar los servicios.
-
-**Atributos:**
-
-* `id`
-* `nombre`
-* `icono`
 
 ---
 
@@ -112,7 +102,7 @@ Relacionado a una reserva.
 * `monto`
 * `fechaPago`
 * `estado`
-* `métodoPago` (STRIPE, PAYPAL)
+* `métodoPago` (STRIPE)
 
 ---
 
@@ -146,14 +136,17 @@ Escrita por el cliente luego de un servicio completado.
 
 | Método | Endpoint         | Descripción                   |
 | ------ | ---------------- | ----------------------------- |
+| GET    | `/auth/{id}`     | Obtener información de un proveedor |
 | POST   | `/auth/register` | Registro de cliente/proveedor |
 | POST   | `/auth/login`    | Autenticación de usuarios     |
+| PATCH  | `/auth/update/{id}` | Actualización de datos de usuario  |
+| DELETE | `/auth/delete/{id}` | Elimiar un usuario (solo los administradores pueden hacerlo) |
 
 ### Servicios
 
 | Método | Endpoint         | Descripción                                                         |
 | ------ | ---------------- | ------------------------------------------------------------------- |
-| GET    | `/services`      | Buscar servicios con filtros (categoría, ubicación, disponibilidad) |
+| GET    | `/services`      | Buscar servicios con o sin filtros (categoría, ubicación, disponibilidad, precio, calificación) |
 | POST   | `/services`      | Crear un servicio (Proveedor)                                       |
 | GET    | `/services/{id}` | Ver detalles del servicio                                           |
 
@@ -165,6 +158,7 @@ Escrita por el cliente luego de un servicio completado.
 | PATCH  | `/bookings/{id}/status`   | Actualizar estado de reserva (Proveedor/Cliente) |
 | GET    | `/bookings/client/{id}`   | Listar reservas por cliente                      |
 | GET    | `/bookings/provider/{id}` | Listar reservas por proveedor                    |
+|
 
 ### Pagos
 
@@ -172,12 +166,13 @@ Escrita por el cliente luego de un servicio completado.
 | ------ | ----------------------- | ------------------------ |
 | POST   | `/payments/checkout`    | Procesar pago de reserva |
 | GET    | `/payments/{reservaId}` | Ver estado del pago      |
+| PATH   | `/payments/{reservaId}` | Actualiza el estado del pago |
 
 ### Reseñas
 
 | Método | Endpoint                | Descripción                    |
 | ------ | ----------------------- | ------------------------------ |
-| POST   | `/reviews`              | Publicar reseña                |
+| POST   | `/reviews`              | Publicar reseña y calificación (actualizar la calificación del servicio) |
 | GET    | `/reviews/service/{id}` | Obtener reseñas de un servicio |
 
 ---
@@ -214,9 +209,9 @@ Controlados globalmente con `@ControllerAdvice`
 ## 🔔 Eventos Asíncronos
 
 * Envío de correo de bienvenida (`SendGrid`)
+* Envío de correo para confirmación de actualización de datos
 * Confirmación de pago (`Stripe Webhooks`)
-* Notificaciones de reserva aceptada/cancelada (`Twilio SMS / Email`)
-
+* Envío de correo de reserva por cada estado: GENERADO -> correo para el proveedor, PAGADO -> correo para proveedor y cliente, ACEPTADO -> correo para el cliente, CANCELADO -> para la otra persona (si cancela en cliente se envía un correo al proveedor), TERMINADO -> correo al cliente
 ---
 
 ## 🧪 Testing
