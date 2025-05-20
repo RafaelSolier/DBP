@@ -8,172 +8,157 @@ El proyecto tiene como objetivo desarrollar una aplicación web y móvil tipo ma
 
 ---
 
-## ⚙️ Tecnologías y Herramientas
+2. Tecnologías y Arquitectura
 
-* **Java 17+**
-* **Spring Boot 3.x**
-* **Spring Data JPA**
-* **Spring Security + JWT**
-* **PostgreSQL**
-* **Stripe API **
-* **Google Maps API**
-* **JUnit / Mockito / Testcontainers**
+Backend: Java 17+, Spring Boot 3.x, Spring Security (JWT), Spring Data JPA.
+
+Base de Datos: PostgreSQL.
+
+ORM: JPA/Hibernate.
+
+Frontend: React (opcional), integrado vía API REST.
+
+Servicios Externos: Stripe, Google Maps
+
+Testing: JUnit, Mockito, Spring Test.
+
+La aplicación seguirá arquitectura hexagonal:
+```text 
+Controller → Service → Repository → Database
+        ↕          ↕       ↕
+     DTO/Mapper      Entities
+```
+---
+
+## Modelo de Datos y Relaciones
+
+### Entidades Principales
+
+| Entidad   | Atributos clave                                                      | Relaciones                          |
+| --------- | -------------------------------------------------------------------- | ----------------------------------- |
+| Cliente   | id, nombre, apellido, email, teléfono, contraseña(encrypted), foto   | 1\:N Reservas, 1\:N Reseñas         |
+| Proveedor | id, nombre, apellido, email, teléfono, contraseña, foto, rating      | 1\:N Servicios, 1\:N Reservas       |
+| Servicio  | id, nombre, descripción, tarifa, categoría (como un enum: LIMPIEZA, PLOMERIA, ELECTRICISTA, CARPINTERIA, PINTURA, JARDINERIA, CUIDADOS)                          | N:1 Proveedor, 1\:N Horarios        |
+| Horario   | id, díaSemana, horaInicio, horaFin                                   | N:1 Servicio                        |
+| Reserva   | id, fechaReservada, horaReservada, dirección, estado (como un emun: GENERADO, PAGADO, ACEPTADO, CANCELADO, TERMINADO), fechaSolicitud | N:1 Cliente, N:1 Servicio, 1:1 Pago |
+| Pago      | id, monto, fecha, estado                                     | 1:1 Reserva                         |
+| Reseña    | id, puntuación(1-5), comentario, fecha                               | N:1 Cliente, N:1 Servicio           |
+
+
 
 ---
 
-## 🧩 Entidades Principales
+## Capas y Métodos Clave
 
-### 🧍 Usuario
+### Capa de Repositorios (Spring Data JPA)
 
-Los usuarios pueden ser **Clientes** (contratan servicios) o **Proveedores** (ofrecen servicios), e incluso ambos.
+Definir una interfaz por entidad, adaptando consultas a filtros de categoría, proximidad, precio y calificación:
 
-**Atributos comunes:**
+```java
+public interface ClienteRepository extends JpaRepository<Cliente, Long> {}
+public interface ProveedorRepository extends JpaRepository<Proveedor, Long> {}
+public interface ServicioRepository extends JpaRepository<Servicio, Long> {
+    Page<Servicio> findByCategoria(String categoria, Pageable page);
+    @Query("SELECT s FROM Servicio s WHERE distance(s.ubicacion, :coord) < :rango")
+    Page<Servicio> findPorProximidad(@Param("coord") Point coord,
+                                     @Param("rango") double rango,
+                                     Pageable page);
+    Page<Servicio> findByTarifaBetween(double min, double max, Pageable page);
+    Page<Servicio> findByRatingGreaterThanEqual(double rating, Pageable page);
+}
+public interface HorarioRepository extends JpaRepository<Horario, Long> {
+    List<Horario> findByServicioIdAndDiaSemana(Long servicioId, DiaSemana dia);
+}
+public interface ReservaRepository extends JpaRepository<Reserva, Long> {
+    List<Reserva> findByClienteId(Long clienteId);
+    List<Reserva> findByProveedorIdAndEstado(Long proveedorId, EstadoReserva estado);
+}
+public interface PagoRepository extends JpaRepository<Pago, Long> {}
+public interface ReseñaRepository extends JpaRepository<Reseña, Long> {
+    List<Reseña> findByServicioId(Long servicioId);
+}
+```
 
-* `id`
-* `nombre`
-* `apellido`
-* `correo`
-* `teléfono`
-* `contraseña` (encriptada)
-* `fechaRegistro`
-* `rol` (CLIENTE, PROVEEDOR, AMBOS)
+### Capa de Servicios (lógica de negocio)
 
----
+#### ClienteService
 
-### 🛠️ Servicio
+```java
+ClienteDto registrar(ClienteRequestDto dto);
+TokenDto login(LoginDto dto);
+Page<ServicioDto> buscarServicios(FiltroServicioDto filtros, Pageable page);
+ReservaDto crearReserva(ReservaRequestDto dto);
+void cancelarReserva(Long reservaId, Long clienteId);
+List<ReservaDto> misReservas(Long clienteId);
+```
 
-Cada proveedor puede ofrecer múltiples servicios.
+#### ProveedorService
 
-**Atributos:**
+```java
+ProveedorDto registrar(ProveedorRequestDto dto);
+ServicioDto crearServicio(ServicioRequestDto dto);
+ServicioDto actualizarServicio(Long id, ServicioRequestDto dto);
+void definirDisponibilidad(Long servicioId, List<HorarioDto> horarios);
+List<ReservaDto> verReservasPendientes(Long proveedorId);
+void aceptarReserva(Long reservaId);
+void completarReserva(Long reservaId);
+```
 
-* `id`
-* `nombre`
-* `descripción`
-* `tarifa`
-* `categoría`
-* `categoria` (como un enum: LIMPIEZA, PLOMERIA, ELECTRICISTA, CARPINTERIA, PINTURA, JARDINERIA, CUIDADOS)
-* `proveedorId` (FK)
-* `calificaciónPromedio`
-* `disponibilidadHoraria` (relación 1 a muchos con `Horario`)
+#### ReservaService
 
----
+```java
+Page<ReservaDto> obtenerReservasPorFiltro(ReservaFiltroDto filtros, Pageable page);
+ReservaDto detalleReserva(Long reservaId);
+```
 
-### 🗓️ Horario
+#### PagoService
 
-Define los bloques horarios en los que un servicio está disponible.
+```java
+PagoDto procesarPago(Long reservaId, PagoRequestDto dto);
+```
 
-**Atributos:**
+#### ReseñaService
 
-* `id`
-* `díaSemana`
-* `horaInicio`
-* `horaFin`
+```java
+ReseñaDto crearReseña(ReseñaRequestDto dto);
+List<ReseñaDto> listarReseñas(Long servicioId);
+```
+### Capa de controladores REST API
+#### ClienteController
 
-* `servicioId` (FK)
+| Método | Ruta                                         | Parámetros                                                                       | Tipo Parámetros                           | Código HTTP | Descripción                                                                                   |
+| ------ | -------------------------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------- | ----------- | --------------------------------------------------------------------------------------------- |
+| POST   | /api/clientes                                | request body                                                                     | ClienteRequestDto (DTO)                   | 201         | Crea un nuevo perfil de cliente y envía confirmación de registro.                             |
+| POST   | /api/clientes/login                          | request body                                                                     | LoginDto (DTO)                            | 200         | Valida credenciales y devuelve un token JWT para acceso a recursos protegidos.                |
+| GET    | /api/servicios                               | query parameters (filtros de categoría, ubicación, precio, calificación, paging) | FiltroServicioDto (DTO)                   | 200         | Recupera lista paginada de servicios aplicando filtros según criterios proporcionados.        |
+| POST   | /api/clientes/{id}/reservas                  | path parameter: id, request body                                                 | Long (Entity id), ReservaRequestDto (DTO) | 201         | Registra una nueva reserva para el cliente, vinculándola al servicio y horario seleccionados. |
+| PATCH  | /api/clientes/{id}/reservas/{resId}/cancelar | path parameters: id, resId                                                       | Long (Entity ids)                         | 204         | Cambia el estado de la reserva a 'CANCELADA' si aún está en estado pendiente.                 |
+| GET    | /api/clientes/{id}/reservas                  | path parameter: id                                                               | Long (Entity id)                          | 200         | Devuelve todas las reservas asociadas al cliente, con su estado y detalles.                   |
 
----
+#### ProveedorController
 
-### 📅 Reserva
+| Método | Ruta                            | Parámetros                       | Tipo Parámetros                            | Código HTTP | Descripción                                                                              |
+| ------ | ------------------------------- | -------------------------------- | ------------------------------------------ | ----------- | ---------------------------------------------------------------------------------------- |
+| POST   | /api/proveedores                | request body                     | ProveedorRequestDto (DTO)                  | 201         | Crea un nuevo perfil de proveedor, registrando datos y perfil de servicios.              |
+| POST   | /api/proveedores/{id}/servicios | path parameter: id, request body | Long (Entity id), ServicioRequestDto (DTO) | 201         | Agrega un nuevo servicio al catálogo del proveedor con detalles como tarifa y categoría. |
+| PUT    | /api/servicios/{id}             | path parameter: id, request body | Long (Entity id), ServicioRequestDto (DTO) | 200         | Modifica datos de un servicio existente (tarifa, descripción, categoría).                |
+| POST   | /api/servicios/{id}/horarios    | path parameter: id, request body | Long (Entity id), List<HorarioDto> (DTO)   | 204         | Establece horarios disponibles para el servicio, especificando días y franjas horarias.  |
+| GET    | /api/proveedores/{id}/reservas  | path parameter: id               | Long (Entity id)                           | 200         | Muestra reservas en estados 'PENDIENTE' o 'ACEPTADA' asignadas al proveedor.             |
+| PATCH  | /api/reservas/{resId}/aceptar   | path parameter: resId            | Long (Entity id)                           | 200         | Cambia el estado de la reserva a 'ACEPTADA', bloqueando el horario correspondiente.      |
+| PATCH  | /api/reservas/{resId}/completar | path parameter: resId            | Long (Entity id)                           | 200         | Marca la reserva como 'COMPLETADA' una vez finalizado el servicio.                       |
 
-Reserva realizada por un cliente para un servicio específico.
+#### PagoController
 
-**Atributos:**
+| Método | Ruta                   | Parámetros                              | Tipo Parámetros                        | Código HTTP | Descripción                                                        |
+| ------ | ---------------------- | --------------------------------------- | -------------------------------------- | ----------- | ------------------------------------------------------------------ |
+| POST   | /api/pagos/{reservaId} | path parameter: reservaId, request body | Long (Entity id), PagoRequestDto (DTO) | 201         | Registra y procesa el pago asociado a una reserva mediante Stripe. |
 
-* `id`
-* `fechaReserva`
-* `hora`
-* `estado` (GENERADO, PAGADO, ACEPTADO, CANCELADO, TERMINADO)
-* `clienteId` (FK)
-* `servicioId` (FK)
-* `canceladoPor` (CLIENTE/PROVEEDOR)
-* `fechaCreacion`
-* `dirección`
+#### ReseñaController
 
----
-
-### 💳 Pago
-
-Relacionado a una reserva.
-
-**Atributos:**
-
-* `id`
-* `reservaId` (FK)
-* `monto`
-* `fechaPago`
-* `estado`
-* `métodoPago` (STRIPE)
-
----
-
-### 🌟 Reseña
-
-Escrita por el cliente luego de un servicio completado.
-
-**Atributos:**
-
-* `id`
-* `reservaId` (FK)
-* `puntuación` (1-5)
-* `comentario`
-* `fechaCreacion`
-
----
-
-## 🔄 Relaciones Clave
-
-* Un **Proveedor** tiene múltiples **Servicios**.
-* Un **Servicio** tiene múltiples **Horarios**.
-* Un **Cliente** puede hacer múltiples **Reservas**, cada una vinculada a un **Servicio**.
-* Cada **Reserva** tiene un único **Pago**.
-* Una **Reseña** es posible sólo si la **Reserva** está en estado **TERMINADO**.
-
----
-
-## 🌐 Endpoints Principales
-
-### Usuarios
-
-| Método | Endpoint         | Descripción                   |
-| ------ | ---------------- | ----------------------------- |
-| GET    | `/auth/{id}`     | Obtener información de un proveedor |
-| POST   | `/auth/register` | Registro de cliente/proveedor |
-| POST   | `/auth/login`    | Autenticación de usuarios     |
-| PATCH  | `/auth/update/{id}` | Actualización de datos de usuario  |
-| DELETE | `/auth/delete/{id}` | Elimiar un usuario (solo los administradores pueden hacerlo) |
-
-### Servicios
-
-| Método | Endpoint         | Descripción                                                         |
-| ------ | ---------------- | ------------------------------------------------------------------- |
-| GET    | `/services`      | Buscar servicios con o sin filtros (categoría, ubicación, disponibilidad, precio, calificación) |
-| POST   | `/services`      | Crear un servicio (Proveedor)                                       |
-| GET    | `/services/{id}` | Ver detalles del servicio                                           |
-
-### Reservas
-
-| Método | Endpoint                  | Descripción                                      |
-| ------ | ------------------------- | ------------------------------------------------ |
-| POST   | `/bookings`               | Crear una reserva (Cliente)                      |
-| PATCH  | `/bookings/{id}/status`   | Actualizar estado de reserva (Proveedor/Cliente) |
-| GET    | `/bookings/client/{id}`   | Listar reservas por cliente                      |
-| GET    | `/bookings/provider/{id}` | Listar reservas por proveedor                    |
-|
-
-### Pagos
-
-| Método | Endpoint                | Descripción              |
-| ------ | ----------------------- | ------------------------ |
-| POST   | `/payments/checkout`    | Procesar pago de reserva |
-| GET    | `/payments/{reservaId}` | Ver estado del pago      |
-| PATH   | `/payments/{reservaId}` | Actualiza el estado del pago |
-
-### Reseñas
-
-| Método | Endpoint                | Descripción                    |
-| ------ | ----------------------- | ------------------------------ |
-| POST   | `/reviews`              | Publicar reseña y calificación (actualizar la calificación del servicio) |
-| GET    | `/reviews/service/{id}` | Obtener reseñas de un servicio |
+| Método | Ruta                        | Parámetros         | Tipo Parámetros        | Código HTTP | Descripción                                                                         |
+| ------ | --------------------------- | ------------------ | ---------------------- | ----------- | ----------------------------------------------------------------------------------- |
+| POST   | /api/resenas                | request body       | ReseñaRequestDto (DTO) | 201         | Permite al cliente añadir una calificación y comentario tras completar un servicio. |
+| GET    | /api/servicios/{id}/resenas | path parameter: id | Long (Entity id)       | 200         | Recupera todas las reseñas y puntuaciones asociadas a un servicio.                  |
 
 ---
 
@@ -196,22 +181,26 @@ Se recomienda el uso de:
 
 ## ❌ Manejo de Errores
 
-* `404`: Recurso no encontrado
-* `409`: Conflictos (doble reserva, usuario existente)
-* `400`: Datos inválidos (validados con DTOs)
-* `401`: Autenticación fallida
-* `500`: Error interno
-
+* **400 Bad Request**: Fallos de validación (Bean Validation).
+* **401 Unauthorized**: Token JWT inválido o expirado.
+* **403 Forbidden**: Permiso denegado.
+* **404 Not Found**: Entidad no encontrada.
+* **409 Conflict**: Reserva o recurso duplicado.
+* **500 Internal Server Error**: Error inesperado.
 Controlados globalmente con `@ControllerAdvice`
 
 ---
 
 ## 🔔 Eventos Asíncronos
+* Usar eventos de Spring para disparar correos electrónicos en:
 
-* Envío de correo de bienvenida (`SendGrid`)
-* Envío de correo para confirmación de actualización de datos
-* Confirmación de pago (`Stripe Webhooks`)
-* Envío de correo de reserva por cada estado: GENERADO -> correo para el proveedor, PAGADO -> correo para proveedor y cliente, ACEPTADO -> correo para el cliente, CANCELADO -> para la otra persona (si cancela en cliente se envía un correo al proveedor), TERMINADO -> correo al cliente
+  * Confirmación de registro.
+  * * Confirmación de pago
+  * Creación, cancelación y finalización de reservas.
+  * Envío de correo de reserva por cada estado: GENERADO -> correo para el proveedor, PAGADO -> correo para proveedor y cliente, ACEPTADO -> correo para el cliente, CANCELADO -> para la otra persona (si cancela el cliente se envía un correo al proveedor), TERMINADO -> correo al cliente
+* **Webhooks** de Stripe para actualizar el estado de pagos.
+
+
 ---
 
 ## 🧪 Testing
@@ -221,15 +210,12 @@ Controlados globalmente con `@ControllerAdvice`
 * **E2E:** flujo completo: registro → búsqueda → reserva → pago → reseña
 
 ---
+## Integraciones de Terceros
 
-## ☁️ Integraciones
-
-| Servicio              | Uso                                      |
-| --------------------- | ---------------------------------------- |
-| Stripe       | Procesamiento de pagos                   |
-| Google Maps API       | Geolocalización y búsqueda por ubicación |
-| Firebase Auth / OAuth | Login con Google o Facebook              |
-| SendGrid / Twilio     | Notificaciones por email/SMS             |
+* **Stripe**: Procesamiento de pagos.
+* **Google Maps API**: Geocodificación y cálculo de proximidad.
+* **Proveedor de Email** (SendGrid/Amazon SES): Envío de notificaciones.
+* **OAuth2** (Google, Facebook): Login social.
 
 ---
 
@@ -240,5 +226,3 @@ Controlados globalmente con `@ControllerAdvice`
 * Despliegue sugerido en Railway / Render / Vercel (frontend)
 
 ---
-
-¿Te gustaría que también genere un diagrama E-R, Swagger UI, o Dockerfile para este proyecto?
