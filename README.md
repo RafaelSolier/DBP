@@ -15,8 +15,8 @@ El proyecto tiene como objetivo desarrollar una aplicación web y móvil tipo ma
 * **Spring Data JPA**
 * **Spring Security + JWT**
 * **PostgreSQL**
-* **Stripe API / PayPal (modo sandbox)**
-* **SendGrid / Twilio / Google Maps API**
+* **Stripe API **
+* **Google Maps API**
 * **JUnit / Mockito / Testcontainers**
 
 ---
@@ -226,7 +226,7 @@ Controlados globalmente con `@ControllerAdvice`
 
 | Servicio              | Uso                                      |
 | --------------------- | ---------------------------------------- |
-| Stripe / PayPal       | Procesamiento de pagos                   |
+| Stripe       | Procesamiento de pagos                   |
 | Google Maps API       | Geolocalización y búsqueda por ubicación |
 | Firebase Auth / OAuth | Login con Google o Facebook              |
 | SendGrid / Twilio     | Notificaciones por email/SMS             |
