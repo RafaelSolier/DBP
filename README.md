@@ -1,5 +1,3 @@
-Aquí tienes un `README.md` detallado para el proyecto **Marketplace de Servicios Domésticos**, redactado en base a la propuesta entregada y siguiendo la estructura de los otros proyectos de referencia:
-
 ---
 
 # 🧹 Marketplace de Servicios Domésticos
