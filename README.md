@@ -18,15 +18,15 @@ ORM: JPA/Hibernate.
 
 Frontend: React (opcional), integrado vía API REST.
 
-Servicios Externos: Stripe, Google Maps
+Servicios Externos: Stripe
 
 Testing: JUnit, Mockito, Spring Test.
 
 La aplicación seguirá arquitectura hexagonal:
 ```text 
-Controller → Service → Repository → Database
+Controller → Service → Entities → Database
         ↕          ↕       ↕
-     DTO/Mapper      Entities
+     DTO/Mapper    Repository
 ```
 ---
 
@@ -34,17 +34,15 @@ Controller → Service → Repository → Database
 
 ### Entidades Principales
 
-| Entidad   | Atributos clave                                                      | Relaciones                          |
-| --------- | -------------------------------------------------------------------- | ----------------------------------- |
-| Cliente   | id, nombre, apellido, email, teléfono, contraseña(encrypted), foto   | 1\:N Reservas, 1\:N Reseñas         |
-| Proveedor | id, nombre, apellido, email, teléfono, contraseña, foto, rating      | 1\:N Servicios, 1\:N Reservas       |
-| Servicio  | id, nombre, descripción, tarifa, categoría (como un enum: LIMPIEZA, PLOMERIA, ELECTRICISTA, CARPINTERIA, PINTURA, JARDINERIA, CUIDADOS)                          | N:1 Proveedor, 1\:N Horarios        |
-| Horario   | id, díaSemana, horaInicio, horaFin                                   | N:1 Servicio                        |
-| Reserva   | id, fechaReservada, horaReservada, dirección, estado (como un emun: GENERADO, PAGADO, ACEPTADO, CANCELADO, TERMINADO), fechaSolicitud | N:1 Cliente, N:1 Servicio, 1:1 Pago |
+| Entidad   | Atributos clave                                                    | Relaciones                          |
+| --------- | ------------------------------------------------------------------ | ----------------------------------- |
+| Cliente   | id, nombre, apellido, email, teléfono, contraseña(encrypted), foto | 1\:N Reservas, 1\:N Reseñas         |
+| Proveedor | id, nombre, apellido, email, teléfono, contraseña, foto, rating    | 1\:N Servicios, 1\:N Reservas       |
+| Servicio  | id, nombre, descripción, tarifa, categoría (como un enum: LIMPIEZA, PLOMERIA, ELECTRICISTA, CARPINTERIA, PINTURA, JARDINERIA, CUIDADOS) | N:1 Proveedor, 1\:N Horarios        |
+| Disponibilidad   | id, díaSemana, horaInicio, horaFin                           | N:1 Servicio                        |
+| Reserva   | id, fechaReservada, dirección, estado (como un emun: GENERADO, PAGADO, ACEPTADO, CANCELADO, TERMINADO) | N:1 Cliente, N:1 Servicio, 1:1 Pago |
 | Pago      | id, monto, fecha, estado                                     | 1:1 Reserva                         |
-| Reseña    | id, puntuación(1-5), comentario, fecha                               | N:1 Cliente, N:1 Servicio           |
-
-
+| Reseña    | id, puntuación(1-5), comentario, fecha                             | N:1 Cliente, N:1 Servicio           |
 
 ---
 
@@ -175,7 +173,6 @@ Se recomienda el uso de:
 
 * `@Valid`
 * `@NotNull`, `@Email`, `@Size`, `@Min`, etc.
-* DTOs separados para creación y respuesta
 
 ---
 
@@ -195,34 +192,39 @@ Controlados globalmente con `@ControllerAdvice`
 * Usar eventos de Spring para disparar correos electrónicos en:
 
   * Confirmación de registro.
-  * * Confirmación de pago
+  * Confirmación de pago
   * Creación, cancelación y finalización de reservas.
-  * Envío de correo de reserva por cada estado: GENERADO -> correo para el proveedor, PAGADO -> correo para proveedor y cliente, ACEPTADO -> correo para el cliente, CANCELADO -> para la otra persona (si cancela el cliente se envía un correo al proveedor), TERMINADO -> correo al cliente
 * **Webhooks** de Stripe para actualizar el estado de pagos.
 
 
 ---
 
-## 🧪 Testing
-
-* **Unit Test:** lógica de servicios
-* **Integration Test:** pagos, autenticación, reservas
-* **E2E:** flujo completo: registro → búsqueda → reserva → pago → reseña
-
 ---
 ## Integraciones de Terceros
 
 * **Stripe**: Procesamiento de pagos.
-* **Google Maps API**: Geocodificación y cálculo de proximidad.
-* **Proveedor de Email** (SendGrid/Amazon SES): Envío de notificaciones.
-* **OAuth2** (Google, Facebook): Login social.
+* **Spring Mail** (JavaMailSender): Envío de notificaciones por correo.
 
 ---
 
 ## 🚀 Despliegue
 
-* Base de datos PostgreSQL
-* Docker para entorno local
-* Despliegue sugerido en Railway / Render / Vercel (frontend)
+* Base de datos PostgreSQL en un contenedor Docker local. Configurar el aplication.properties como mínimo:
+```
+spring.application.name=eventosConWhereby
+
+spring.datasource.url=jdbc:postgresql://localhost:5555/postgres
+spring.datasource.username=postgres
+spring.datasource.password=123
+spring.jpa.hibernate.ddl-auto=update
+
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=${MAIL_USERNAME}
+spring.mail.password=${MAIL_PASSWORD}
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+```
+* Despliegue sugerido en Node.js con React (frontend)
 
 ---
