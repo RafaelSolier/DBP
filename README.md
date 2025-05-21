@@ -56,16 +56,12 @@ Definir una interfaz por entidad, adaptando consultas a filtros de categoría, p
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {}
 public interface ProveedorRepository extends JpaRepository<Proveedor, Long> {}
 public interface ServicioRepository extends JpaRepository<Servicio, Long> {
-    Page<Servicio> findByCategoria(String categoria, Pageable page);
-    @Query("SELECT s FROM Servicio s WHERE distance(s.ubicacion, :coord) < :rango")
-    Page<Servicio> findPorProximidad(@Param("coord") Point coord,
-                                     @Param("rango") double rango,
-                                     Pageable page);
-    Page<Servicio> findByTarifaBetween(double min, double max, Pageable page);
-    Page<Servicio> findByRatingGreaterThanEqual(double rating, Pageable page);
+    Servicio findByCategoria(String categoria);
+    List<Servicio> findByTarifaBetween(double min, double max);
+    List<Servicio> findByRatingGreaterThanEqual(double rating);
 }
-public interface HorarioRepository extends JpaRepository<Horario, Long> {
-    List<Horario> findByServicioIdAndDiaSemana(Long servicioId, DiaSemana dia);
+public interface DisponibilidadRepository extends JpaRepository<Horario, Long> {
+    List<Disponibilidad> findByServicioIdAndDiaSemana(Long servicioId, DiaSemana dia);
 }
 public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     List<Reserva> findByClienteId(Long clienteId);
@@ -84,7 +80,7 @@ public interface ReseñaRepository extends JpaRepository<Reseña, Long> {
 ```java
 ClienteDto registrar(ClienteRequestDto dto);
 TokenDto login(LoginDto dto);
-Page<ServicioDto> buscarServicios(FiltroServicioDto filtros, Pageable page);
+List<ServicioDto> buscarServicios(FiltroServicioDto filtros);
 ReservaDto crearReserva(ReservaRequestDto dto);
 void cancelarReserva(Long reservaId, Long clienteId);
 List<ReservaDto> misReservas(Long clienteId);
@@ -96,7 +92,7 @@ List<ReservaDto> misReservas(Long clienteId);
 ProveedorDto registrar(ProveedorRequestDto dto);
 ServicioDto crearServicio(ServicioRequestDto dto);
 ServicioDto actualizarServicio(Long id, ServicioRequestDto dto);
-void definirDisponibilidad(Long servicioId, List<HorarioDto> horarios);
+void definirDisponibilidad(Long servicioId, List<DisponibilidadDto> Disponibilidad);
 List<ReservaDto> verReservasPendientes(Long proveedorId);
 void aceptarReserva(Long reservaId);
 void completarReserva(Long reservaId);
@@ -105,7 +101,7 @@ void completarReserva(Long reservaId);
 #### ReservaService
 
 ```java
-Page<ReservaDto> obtenerReservasPorFiltro(ReservaFiltroDto filtros, Pageable page);
+List<ReservaDto> obtenerReservasPorFiltro(ReservaFiltroDto filtros);
 ReservaDto detalleReserva(Long reservaId);
 ```
 
@@ -121,6 +117,14 @@ PagoDto procesarPago(Long reservaId, PagoRequestDto dto);
 ReseñaDto crearReseña(ReseñaRequestDto dto);
 List<ReseñaDto> listarReseñas(Long servicioId);
 ```
+
+### DisponibilidadService
+
+```java
+List<Disponibilidad> obtenerDisponibilidadByServicioId(Long servicio_id);
+Disponibilidad crearDisponibilidad(DisponibilidadDto dto);
+```
+
 ### Capa de controladores REST API
 #### ClienteController
 
@@ -128,7 +132,7 @@ List<ReseñaDto> listarReseñas(Long servicioId);
 | ------ | -------------------------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------- | ----------- | --------------------------------------------------------------------------------------------- |
 | POST   | /api/clientes                                | request body                                                                     | ClienteRequestDto (DTO)                   | 201         | Crea un nuevo perfil de cliente y envía confirmación de registro.                             |
 | POST   | /api/clientes/login                          | request body                                                                     | LoginDto (DTO)                            | 200         | Valida credenciales y devuelve un token JWT para acceso a recursos protegidos.                |
-| GET    | /api/servicios                               | query parameters (filtros de categoría, ubicación, precio, calificación, paging) | FiltroServicioDto (DTO)                   | 200         | Recupera lista paginada de servicios aplicando filtros según criterios proporcionados.        |
+| GET    | /api/servicios                               | query parameters (filtros de categoría, direccion, precio, calificación, paging) | FiltroServicioDto (DTO)                   | 200         | Recupera lista paginada de servicios aplicando filtros según criterios proporcionados.        |
 | POST   | /api/clientes/{id}/reservas                  | path parameter: id, request body                                                 | Long (Entity id), ReservaRequestDto (DTO) | 201         | Registra una nueva reserva para el cliente, vinculándola al servicio y horario seleccionados. |
 | PATCH  | /api/clientes/{id}/reservas/{resId}/cancelar | path parameters: id, resId                                                       | Long (Entity ids)                         | 204         | Cambia el estado de la reserva a 'CANCELADA' si aún está en estado pendiente.                 |
 | GET    | /api/clientes/{id}/reservas                  | path parameter: id                                                               | Long (Entity id)                          | 200         | Devuelve todas las reservas asociadas al cliente, con su estado y detalles.                   |
