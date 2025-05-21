@@ -14,20 +14,30 @@ public class Cliente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String nombre;
 
+    @Column(nullable = false)
+    private String apellido;
+
+    @Column(nullable = false, unique = true)
     private String email;
+
+    @Column(nullable = false)
+    private String telefono;
 
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
-    private LocalDateTime fechaRegistro;
+    private String foto;
 
-    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Column(nullable = false)
+    private LocalDateTime fechaRegistro = LocalDateTime.now();
+
+    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reserva> reservas;
 
-    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Resena> resenas;
     // getters y setters
 }

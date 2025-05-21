@@ -15,14 +15,11 @@ public class Pago {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String stripePaymentId;
-
     @Column(nullable = false)
     private BigDecimal monto;
 
     @Column(nullable = false)
-    private LocalDateTime fechaPago;
+    private LocalDateTime fechaPago = LocalDateTime.now();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

@@ -1,14 +1,17 @@
 package com.example.proyecto.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
-public class ReservaDTO {
-    private Long id;
-    private Long clienteId;
+public class ReservaRequestDTO {
+
+    @NotNull
     private Long servicioId;
-    private String estado;
+    @NotNull
+    private Long clienteId;
+    @NotNull
     private LocalDateTime fechaReserva;
 }
