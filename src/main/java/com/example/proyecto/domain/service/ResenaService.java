@@ -5,6 +5,7 @@ import com.example.proyecto.domain.entity.Resena;
 import com.example.proyecto.domain.entity.Servicio;
 import com.example.proyecto.dto.ResenaDTO;
 import com.example.proyecto.dto.ResenaRequestDto;
+import com.example.proyecto.exception.ResourceNotFoundException;
 import com.example.proyecto.infrastructure.ClienteRepository;
 import com.example.proyecto.infrastructure.ResenaRepository;
 import com.example.proyecto.infrastructure.ServicioRepository;

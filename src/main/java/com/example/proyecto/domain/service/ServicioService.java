@@ -1,14 +1,19 @@
 package com.example.proyecto.domain.service;
 
-import com.example.proyecto.domain.*;
+import com.example.proyecto.domain.entity.*;
 import com.example.proyecto.domain.enums.Categorias;
 import com.example.proyecto.dto.ServicioRequestDto;
 import com.example.proyecto.dto.FiltroServicioDTO;
 import com.example.proyecto.dto.ServicioDTO;
+import com.example.proyecto.exception.ResourceNotFoundException;
 import com.example.proyecto.infrastructure.ServicioRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.data.jpa.domain.Specification;
 import java.util.ArrayList;
@@ -24,6 +29,9 @@ public class ServicioService {
     private final ServicioRepository servicioRepository;
     private final ModelMapper modelMapper;
 
+    public Servicio findById(Long id) {
+        return servicioRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Servicio "+ id));
+    }
     public void actualizarServicio(Long servicioId, ServicioRequestDto dto) {
         Servicio existing = servicioRepository.findById(servicioId)
                 .orElseThrow(() -> new ResourceNotFoundException("Servicio no encontrado: " + servicioId));

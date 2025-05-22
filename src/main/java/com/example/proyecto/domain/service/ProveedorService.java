@@ -4,6 +4,7 @@ import com.example.proyecto.domain.entity.Proveedor;
 import com.example.proyecto.domain.entity.Servicio;
 import com.example.proyecto.dto.ProveedorRequestDto;
 import com.example.proyecto.dto.ServicioRequestDto;
+import com.example.proyecto.exception.ResourceNotFoundException;
 import com.example.proyecto.infrastructure.ProveedorRepository;
 import com.example.proyecto.infrastructure.ServicioRepository;
 import jakarta.transaction.Transactional;

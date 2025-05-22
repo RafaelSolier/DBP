@@ -3,6 +3,7 @@ package com.example.proyecto.domain.service;
 import com.example.proyecto.domain.entity.Disponibilidad;
 import com.example.proyecto.domain.entity.Servicio;
 import com.example.proyecto.dto.DisponibilidadDTO;
+import com.example.proyecto.exception.ResourceNotFoundException;
 import com.example.proyecto.infrastructure.DisponibilidadRepository;
 import com.example.proyecto.infrastructure.ServicioRepository;
 import jakarta.transaction.Transactional;

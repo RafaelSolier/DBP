@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
 public class ReservaService {
 
     private final ReservaRepository reservaRepository;
+    private final ClienteService clienteService;
+    private final ServicioService servicioService;
     private final ModelMapper modelMapper;
 
     public List<ReservaDTO> obtenerReservasPorProveedor(Long proveedorId) {
@@ -56,10 +58,8 @@ public class ReservaService {
     }
 
     public ReservaDTO crearReserva(ReservaRequestDTO dto) {
-        Cliente cliente = clienteRepository.findById(dto.getClienteId())
-                .orElseThrow(() -> new ResourceNotFoundException("Cliente", "id", dto.getClienteId()));
-        Servicio servicio = servicioRepository.findById(dto.getServicioId())
-                .orElseThrow(() -> new ResourceNotFoundException("Servicio", "id", dto.getServicioId()));
+        Cliente cliente = clienteService.findById(dto.getClienteId());
+        Servicio servicio = servicioService.findById(dto.getServicioId());
         Reserva reserva = new Reserva();
         reserva.setCliente(cliente);
         reserva.setServicio(servicio);
@@ -72,7 +72,7 @@ public class ReservaService {
     @Transactional
     public void cancelarReserva(Long userId, Long reservaId) {
         Reserva reserva = reservaRepository.findById(reservaId)
-                .orElseThrow(() -> new ResourceNotFoundException("Reserva", "id", reservaId));
+                .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada "+ reservaId));
         if (!reserva.getCliente().getId().equals(userId)) {
             throw new ConflictException("No autorizado para cancelar esta reserva");
         }
