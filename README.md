@@ -68,8 +68,8 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     List<Reserva> findByProveedorIdAndEstado(Long proveedorId, EstadoReserva estado);
 }
 public interface PagoRepository extends JpaRepository<Pago, Long> {}
-public interface ReseñaRepository extends JpaRepository<Reseña, Long> {
-    List<Reseña> findByServicioId(Long servicioId);
+public interface ResenaRepository extends JpaRepository<Resena, Long> {
+    List<Resena> findByServicioId(Long servicioId);
 }
 ```
 

@@ -4,8 +4,10 @@ import com.example.proyecto.Security.JwtService;
 import com.example.proyecto.domain.entity.Cliente;
 import com.example.proyecto.dto.*;
 import com.example.proyecto.exception.ConflictException;
+import com.example.proyecto.exception.ResourceNotFoundException;
 import com.example.proyecto.exception.UnauthorizedException;
 import com.example.proyecto.infrastructure.ClienteRepository;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,28 +16,18 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ClienteService {
 
     private final ClienteRepository clienteRepository;
     private final ModelMapper modelMapper;
-    private final PasswordEncoder passwordEncoder;
+    //private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final ServicioService servicioService;
     private final ReservaService reservaService;
 
-    @Autowired
-    public ClienteService(ClienteRepository clienteRepository,
-                          ModelMapper modelMapper,
-                          PasswordEncoder passwordEncoder,
-                          JwtService jwtService,
-                          ServicioService servicioService,
-                          ReservaService reservaService) {
-        this.clienteRepository = clienteRepository;
-        this.modelMapper = modelMapper;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
-        this.servicioService = servicioService;
-        this.reservaService = reservaService;
+    public Cliente findById(Long id) {
+        return clienteRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado "+ id));
     }
 
     public ClienteDTO registrar(ClienteRequestDTO dto) {

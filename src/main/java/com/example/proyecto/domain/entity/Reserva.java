@@ -1,6 +1,6 @@
 package com.example.proyecto.domain.entity;
 
-import com.example.proyecto.domain.enumerates.EstadoReserva;
+import com.example.proyecto.domain.enums.EstadoReserva;
 import jakarta.persistence.*;
 import lombok.Data;
 

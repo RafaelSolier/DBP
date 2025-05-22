@@ -1,4 +1,4 @@
-package com.example.proyecto.domain.enumerates;
+package com.example.proyecto.domain.enums;
 
 public enum DiaSemana {
     LUNES,

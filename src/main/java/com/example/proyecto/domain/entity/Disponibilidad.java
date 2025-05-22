@@ -1,12 +1,14 @@
 package com.example.proyecto.domain.entity;
 
-import com.example.proyecto.domain.enumerates.DiaSemana;
+import com.example.proyecto.domain.enums.DiaSemana;
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalTime;
 
 @Entity
 @Table(name = "disponibilidades")
+@Data
 public class Disponibilidad {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

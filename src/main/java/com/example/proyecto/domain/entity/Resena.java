@@ -1,9 +1,12 @@
 package com.example.proyecto.domain.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.time.LocalDateTime;
 
 @Entity
+@Data
 @Table(name = "resenas")
 public class Resena {
     @Id

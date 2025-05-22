@@ -1,32 +1,46 @@
-// proyecto/src/main/java/com/example/proyecto/domain/service/ServicioService.java
 package com.example.proyecto.domain.service;
 
-import com.example.proyecto.domain.entity.Servicio;
-import com.example.proyecto.domain.enumerates.Categorias;
+import com.example.proyecto.domain.entity.*;
+import com.example.proyecto.domain.enums.Categorias;
+import com.example.proyecto.dto.ServicioRequestDto;
 import com.example.proyecto.dto.FiltroServicioDTO;
 import com.example.proyecto.dto.ServicioDTO;
+import com.example.proyecto.exception.ResourceNotFoundException;
 import com.example.proyecto.infrastructure.ServicioRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.data.jpa.domain.Specification;
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.persistence.criteria.Predicate;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
+@Transactional
 public class ServicioService {
 
     private final ServicioRepository servicioRepository;
     private final ModelMapper modelMapper;
 
-    @Autowired
-    public ServicioService(ServicioRepository servicioRepository,
-                           ModelMapper modelMapper) {
-        this.servicioRepository = servicioRepository;
-        this.modelMapper = modelMapper;
+    public Servicio findById(Long id) {
+        return servicioRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Servicio "+ id));
+    }
+    public void actualizarServicio(Long servicioId, ServicioRequestDto dto) {
+        Servicio existing = servicioRepository.findById(servicioId)
+                .orElseThrow(() -> new ResourceNotFoundException("Servicio no encontrado: " + servicioId));
+        existing.setNombre(dto.getNombre());
+        existing.setDescripcion(dto.getDescripcion());
+        existing.setPrecio(dto.getPrecio());
+        Categorias categoriaDto = Categorias.valueOf(dto.getCategoria());   // Puede desencadenar un IllegalArgumentException si no coincide con alguno
+        existing.setCategoria(categoriaDto);
+        servicioRepository.save(existing);
     }
 
     public List<ServicioDTO> buscarServicios(FiltroServicioDTO filtros) {

@@ -30,11 +30,11 @@ public class PagoService {
     @Transactional
     public PagoDTO procesarPago(Long reservaId, PagoRequestDTO dto) {
         Reserva reserva = reservaRepository.findById(reservaId)
-                .orElseThrow(() -> new ResourceNotFoundException("Reserva", "id", reservaId));
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontró la Reserva con ID: "+ reservaId));
         Pago pago = new Pago();
         pago.setReserva(reserva);
         pago.setMonto(dto.getMonto());
-        pago.setEstado(Enum.valueOf(com.example.proyecto.domain.enumerates.EstadoPago.class, dto.getEstado()));
+        pago.setEstado(Enum.valueOf(com.example.proyecto.domain.enums.EstadoPago.class, dto.getEstado()));
         Pago saved = pagoRepository.save(pago);
         reserva.setPago(saved);
         reservaRepository.save(reserva);

@@ -3,46 +3,63 @@ package com.example.proyecto.domain.service;
 import com.example.proyecto.domain.entity.Cliente;
 import com.example.proyecto.domain.entity.Reserva;
 import com.example.proyecto.domain.entity.Servicio;
-import com.example.proyecto.domain.enumerates.EstadoReserva;
+import com.example.proyecto.domain.enums.EstadoReserva;
 import com.example.proyecto.dto.ReservaDTO;
 import com.example.proyecto.dto.ReservaRequestDTO;
 import com.example.proyecto.exception.ConflictException;
 import com.example.proyecto.exception.ResourceNotFoundException;
-import com.example.proyecto.infrastructure.ClienteRepository;
 import com.example.proyecto.infrastructure.ReservaRepository;
-import com.example.proyecto.infrastructure.ServicioRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
+@RequiredArgsConstructor
 public class ReservaService {
+
     private final ReservaRepository reservaRepository;
-    private final ClienteRepository clienteRepository;
-    private final ServicioRepository servicioRepository;
+    private final ClienteService clienteService;
+    private final ServicioService servicioService;
     private final ModelMapper modelMapper;
 
-    @Autowired
-    public ReservaService(ReservaRepository reservaRepository,
-                          ClienteRepository clienteRepository,
-                          ServicioRepository servicioRepository,
-                          ModelMapper modelMapper) {
-        this.reservaRepository = reservaRepository;
-        this.clienteRepository = clienteRepository;
-        this.servicioRepository = servicioRepository;
-        this.modelMapper = modelMapper;
+    public List<ReservaDTO> obtenerReservasPorProveedor(Long proveedorId) {
+        List<Reserva> reservas = reservaRepository.findByServicioProveedorId(proveedorId);
+        return reservas.stream()
+                .map(r -> modelMapper.map(r, ReservaDTO.class))
+                .collect(Collectors.toList());
     }
 
-    @Transactional
+    public List<ReservaDTO> obtenerReservasPorClienteId(Long clienteId) {
+        List<Reserva> reservas = reservaRepository.findByClienteId(clienteId);
+        return reservas.stream()
+                .map(r -> modelMapper.map(r, ReservaDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    public ReservaDTO aceptarReserva(Long reservaId) {
+        Reserva reserva = reservaRepository.findById(reservaId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada: " + reservaId));
+        reserva.setEstado(EstadoReserva.ACEPTADA);
+        Reserva updated = reservaRepository.save(reserva);
+        return modelMapper.map(updated, ReservaDTO.class);
+    }
+
+    public ReservaDTO completarReserva(Long reservaId) {
+        Reserva reserva = reservaRepository.findById(reservaId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada: " + reservaId));
+        reserva.setEstado(EstadoReserva.COMPLETADA);
+        Reserva updated = reservaRepository.save(reserva);
+        return modelMapper.map(updated, ReservaDTO.class);
+    }
+
     public ReservaDTO crearReserva(ReservaRequestDTO dto) {
-        Cliente cliente = clienteRepository.findById(dto.getClienteId())
-                .orElseThrow(() -> new ResourceNotFoundException("Cliente", "id", dto.getClienteId()));
-        Servicio servicio = servicioRepository.findById(dto.getServicioId())
-                .orElseThrow(() -> new ResourceNotFoundException("Servicio", "id", dto.getServicioId()));
+        Cliente cliente = clienteService.findById(dto.getClienteId());
+        Servicio servicio = servicioService.findById(dto.getServicioId());
         Reserva reserva = new Reserva();
         reserva.setCliente(cliente);
         reserva.setServicio(servicio);
@@ -53,10 +70,13 @@ public class ReservaService {
     }
 
     @Transactional
-    public void cancelarReserva(Long clienteId, Long reservaId) {
+    public void cancelarReserva(Long userId, Long reservaId) {
         Reserva reserva = reservaRepository.findById(reservaId)
-                .orElseThrow(() -> new ResourceNotFoundException("Reserva", "id", reservaId));
-        if (!reserva.getCliente().getId().equals(clienteId)) {
+                .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada "+ reservaId));
+        if (!reserva.getCliente().getId().equals(userId)) {
+            throw new ConflictException("No autorizado para cancelar esta reserva");
+        }
+        if (!reserva.getServicio().getProveedor().getId().equals(userId)){
             throw new ConflictException("No autorizado para cancelar esta reserva");
         }
         if (reserva.getEstado() != EstadoReserva.PENDIENTE) {
