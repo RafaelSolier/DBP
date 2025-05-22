@@ -1,6 +1,6 @@
 package com.example.proyecto.controller;
 
-import com.example.proyecto.domain.enumerates.EstadoReserva;
+import com.example.proyecto.domain.enums.EstadoReserva;
 import com.example.proyecto.domain.service.DisponibilidadService;
 import com.example.proyecto.domain.service.ProveedorService;
 import com.example.proyecto.domain.service.ReservaService;

@@ -1,11 +1,14 @@
 package com.example.proyecto.domain.entity;
 
-import com.example.proyecto.domain.enumerates.Categorias;
+import com.example.proyecto.domain.enums.Categorias;
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
+@Data
 @Table(name = "servicios")
 public class Servicio {
     @Id
