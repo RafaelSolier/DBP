@@ -8,6 +8,7 @@ import com.example.proyecto.dto.ReservaDTO;
 import com.example.proyecto.dto.ReservaRequestDTO;
 import com.example.proyecto.exception.ConflictException;
 import com.example.proyecto.exception.ResourceNotFoundException;
+import com.example.proyecto.infrastructure.ClienteRepository;
 import com.example.proyecto.infrastructure.ReservaRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -23,12 +24,12 @@ import java.util.stream.Collectors;
 public class ReservaService {
 
     private final ReservaRepository reservaRepository;
-    private final ClienteService clienteService;
+    private final ClienteRepository clienteRepository;
     private final ServicioService servicioService;
     private final ModelMapper modelMapper;
 
-    public List<ReservaDTO> obtenerReservasPorProveedor(Long proveedorId) {
-        List<Reserva> reservas = reservaRepository.findByServicioProveedorId(proveedorId);
+    public List<ReservaDTO> obtenerReservasPorProveedorYEstados(Long proveedorId, List<EstadoReserva> estados) {
+        List<Reserva> reservas = reservaRepository.findByServicioProveedorIdAndEstadoIn(proveedorId, estados);
         return reservas.stream()
                 .map(r -> modelMapper.map(r, ReservaDTO.class))
                 .collect(Collectors.toList());
@@ -58,7 +59,8 @@ public class ReservaService {
     }
 
     public ReservaDTO crearReserva(ReservaRequestDTO dto) {
-        Cliente cliente = clienteService.findById(dto.getClienteId());
+        Cliente cliente = clienteRepository.findById(dto.getClienteId())
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado "+ dto.getClienteId()));
         Servicio servicio = servicioService.findById(dto.getServicioId());
         Reserva reserva = new Reserva();
         reserva.setCliente(cliente);

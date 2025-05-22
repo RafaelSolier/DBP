@@ -21,7 +21,7 @@ public class ClienteService {
 
     private final ClienteRepository clienteRepository;
     private final ModelMapper modelMapper;
-    //private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final ServicioService servicioService;
     private final ReservaService reservaService;
