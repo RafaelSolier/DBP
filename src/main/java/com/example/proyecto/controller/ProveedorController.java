@@ -56,7 +56,7 @@ public class ProveedorController {
     @GetMapping("/proveedores/{id}/reservas")
     public ResponseEntity<List<ReservaDTO>> obtenerReservas(@PathVariable Long id) {
         List<ReservaDTO> reservas = reservaService.obtenerReservasPorProveedorYEstados(
-                id, List.of(EstadoReserva.PENDIENTE, EstadoReserva.ACEPTADA));
+                id, List.of(EstadoReserva.PENDIENTE, EstadoReserva.ACEPTADA,EstadoReserva.CANCELADA,EstadoReserva.COMPLETADA ));
         return ResponseEntity.ok(reservas);
     }
 

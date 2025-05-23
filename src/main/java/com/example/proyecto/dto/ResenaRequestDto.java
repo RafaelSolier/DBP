@@ -3,6 +3,8 @@ package com.example.proyecto.dto;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 public class ResenaRequestDto {
     @NotNull
@@ -15,6 +17,9 @@ public class ResenaRequestDto {
     @Min(1)
     @Max(5)
     private Integer calificacion;
+
+    @NotNull
+    private LocalDateTime fecha;
 
     @NotBlank
     @Size(max = 1000)

@@ -3,6 +3,7 @@ package com.example.proyecto.controller;
 import com.example.proyecto.domain.service.ClienteService;
 import com.example.proyecto.dto.*;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,14 +15,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @Validated
+@RequiredArgsConstructor
 public class ClienteController {
 
     private final ClienteService clienteService;
 
-    @Autowired
-    public ClienteController(ClienteService clienteService) {
-        this.clienteService = clienteService;
-    }
+
 
     @PostMapping("/clientes")
     public ResponseEntity<ClienteDTO> registrar(@Valid @RequestBody ClienteRequestDTO dto) {
@@ -42,8 +41,10 @@ public class ClienteController {
     }
 
     @PostMapping("/clientes/{id}/reservas")
-    public ResponseEntity<ReservaDTO> crearReserva(@PathVariable Long id,
-                                                   @Valid @RequestBody ReservaRequestDTO dto) {
+    public ResponseEntity<ReservaDTO> crearReserva(
+            @PathVariable Long id,
+            @Valid @RequestBody ReservaRequestDTO dto
+    ) {
         dto.setClienteId(id);
         ReservaDTO reserva = clienteService.crearReserva(id, dto);
         return new ResponseEntity<>(reserva, HttpStatus.CREATED);
