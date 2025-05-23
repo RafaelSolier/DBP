@@ -77,7 +77,7 @@ public class ServicioService {
         Pageable pageable = PageRequest.of(
                 filtros.getPage(),
                 filtros.getSize(),
-                Sort.by("tarifa").ascending() // o cualquier orden por defecto
+                Sort.by("id").ascending() // o cualquier orden por defecto
         );
 
         // 3. Ejecutar consulta paginada

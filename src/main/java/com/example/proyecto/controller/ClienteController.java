@@ -41,8 +41,10 @@ public class ClienteController {
     }
 
     @PostMapping("/clientes/{id}/reservas")
-    public ResponseEntity<ReservaDTO> crearReserva(@PathVariable Long id,
-                                                   @Valid @RequestBody ReservaRequestDTO dto) {
+    public ResponseEntity<ReservaDTO> crearReserva(
+            @PathVariable Long id,
+            @Valid @RequestBody ReservaRequestDTO dto
+    ) {
         dto.setClienteId(id);
         ReservaDTO reserva = clienteService.crearReserva(id, dto);
         return new ResponseEntity<>(reserva, HttpStatus.CREATED);

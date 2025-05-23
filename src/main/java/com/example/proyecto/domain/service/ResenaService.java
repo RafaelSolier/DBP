@@ -33,12 +33,22 @@ public class ResenaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Servicio no encontrado: " + dto.getServicioId()));
         Cliente cliente = clienteRepository.findById(dto.getClienteId())
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado: " + dto.getClienteId()));
-        Resena resena = modelMapper.map(dto, Resena.class);
-        resena.setServicio(servicio);
+        Resena resena = new Resena();
         resena.setCliente(cliente);
-        resena.setFecha(LocalDateTime.now());
-        Resena saved = resenaRepository.save(resena);
-        return modelMapper.map(saved, ResenaDTO.class);
+        resena.setServicio(servicio);
+        resena.setCalificacion(dto.getCalificacion());
+        resena.setComentario(dto.getComentario());
+        resena.setFecha(dto.getFecha());
+
+        // 3) Guardar y devolver DTO de respuesta
+        Resena guardada = resenaRepository.save(resena);
+        return modelMapper.map(guardada, ResenaDTO.class);
+        //        Resena resena = modelMapper.map(dto, Resena.class);
+//        resena.setServicio(servicio);
+//        resena.setCliente(cliente);
+//        resena.setFecha(LocalDateTime.now());
+//        Resena saved = resenaRepository.save(resena);
+//        return modelMapper.map(saved, ResenaDTO.class);
     }
 
     public List<ResenaDTO> obtenerResenasPorServicio(Long servicioId) {

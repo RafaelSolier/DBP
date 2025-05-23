@@ -1,0 +1,483 @@
+{
+	"info": {
+		"_postman_id": "9e6fc3af-4e4a-4804-bf41-8fa36548e8f5",
+		"name": "Marketplace Servicios Domésticos - Colección Validada",
+		"description": "Colección ajustada según las rutas y validaciones reales del proyecto Spring Boot",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43499216",
+		"_collection_link": "https://yulinio.postman.co/workspace/Yulinio-'s-Workspace~af4968b1-ad8e-4e69-8f31-493458381d4e/collection/43499216-9e6fc3af-4e4a-4804-bf41-8fa36548e8f5?action=share&source=collection_link&creator=43499216"
+	},
+	"item": [
+		{
+			"name": "Registrar Cliente",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"nombre\": \"Juan Pérez\", \"apellido\": \"Gómez\", \"email\": \"juan.perez@example.com\", \"telefono\": \"999123456\", \"password\": \"Passw0rd!\"}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/clientes",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"clientes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login Cliente",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"email\": \"juan.perez@example.com\", \"password\": \"Passw0rd!\"}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/clientes/login",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"clientes",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Buscar Servicios",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/servicios?categoria=&direccion=&precioMin=&precioMax=&calificacionMin=&page=0&size=10",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"servicios"
+					],
+					"query": [
+						{
+							"key": "categoria",
+							"value": ""
+						},
+						{
+							"key": "direccion",
+							"value": ""
+						},
+						{
+							"key": "precioMin",
+							"value": ""
+						},
+						{
+							"key": "precioMax",
+							"value": ""
+						},
+						{
+							"key": "calificacionMin",
+							"value": ""
+						},
+						{
+							"key": "page",
+							"value": "0"
+						},
+						{
+							"key": "size",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crear Reserva Cliente",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{jwt_token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"servicioId\": 4,\r\n  \"clienteId\": 1,\r\n  \"fechaReserva\": \"2025-06-01T10:00:00\",\r\n  \"direccion\": \"Av. Siempre Viva 742\"\r\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/clientes/{{clienteId}}/reservas",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"clientes",
+						"{{clienteId}}",
+						"reservas"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Cancelar Reserva Cliente",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{jwt_token}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/clientes/{{clienteId}}/reservas/{{reservaId}}/cancelar",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"clientes",
+						"{{clienteId}}",
+						"reservas",
+						"{{reservaId}}",
+						"cancelar"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listar Reservas Cliente",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{jwt_token}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/clientes/{{clienteId}}/reservas",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"clientes",
+						"{{clienteId}}",
+						"reservas"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Registrar Proveedor",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"nombre\": \"María López\", \"email\": \"maria.lopez@example.com\", \"password\": \"Prov123!\", \"descripcion\": \"Servicios de limpieza profesional\", \"telefono\": \"988765432\"}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/proveedores",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"proveedores"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Agregar Servicio al Proveedor",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{jwt_token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"nombre\": \"Limpieza de Ventanas\", \"descripcion\": \"Lavado y desinfección de ventanas\", \"precio\": 50.0, \"categoria\": \"PLOMERIA\"}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/proveedores/{{proveedorId}}/servicios",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"proveedores",
+						"{{proveedorId}}",
+						"servicios"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Actualizar Servicio",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{jwt_token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"nombre\": \"Limpieza de Ventanas Premium\", \"descripcion\": \"Incluye tratamiento anti-manchas\", \"precio\": 60.0, \"categoria\": \"PINTURA\"}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/servicios/{{servicioId}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"servicios",
+						"{{servicioId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Establecer Horarios de Servicio",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{jwt_token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[{\"diaSemana\": \"LUNES\", \"horaInicio\": \"08:00:00\", \"horaFin\": \"12:00:00\"}, {\"diaSemana\": \"MIERCOLES\", \"horaInicio\": \"14:00:00\", \"horaFin\": \"18:00:00\"}]"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/servicios/{{servicioId}}/horarios",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"servicios",
+						"{{servicioId}}",
+						"horarios"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listar Reservas Proveedor",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{jwt_token}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/proveedores/{{proveedorId}}/reservas",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"proveedores",
+						"{{proveedorId}}",
+						"reservas"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Aceptar Reserva",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{jwt_token}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/reservas/{{reservaId}}/aceptar",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"reservas",
+						"{{reservaId}}",
+						"aceptar"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Completar Reserva",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{jwt_token}}"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/reservas/{{reservaId}}/completar",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"reservas",
+						"{{reservaId}}",
+						"completar"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Procesar Pago",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{jwt_token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"monto\": 100.0, \"estado\": \"PENDIENTE\"}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/pagos/{{reservaId}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"pagos",
+						"{{reservaId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crear Reseña",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{jwt_token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"servicioId\": 5, \"clienteId\": 1, \"calificacion\": 5, \"comentario\": \"Excelente servicio\", \"fecha\":\"2025-06-01T10:00:00\"}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/resenas",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"resenas"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listar Reseñas de Servicio",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/servicios/{{servicioId}}/resenas",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"servicios",
+						"{{servicioId}}",
+						"resenas"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

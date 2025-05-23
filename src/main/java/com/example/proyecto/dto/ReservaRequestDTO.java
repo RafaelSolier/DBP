@@ -1,5 +1,6 @@
 package com.example.proyecto.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -8,10 +9,17 @@ import java.time.LocalDateTime;
 @Data
 public class ReservaRequestDTO {
 
-    @NotNull
+    @NotNull(message = "servicioId es obligatorio")
     private Long servicioId;
-    @NotNull
+
+    // clienteId se inyecta desde el controller
+    @NotNull(message = "clienteId es obligatorio")
     private Long clienteId;
-    @NotNull
+
+    @NotNull(message = "fechaReserva es obligatoria")
     private LocalDateTime fechaReserva;
+
+    @NotBlank(message = "direccion es obligatoria")
+    private String direccion;
+
 }

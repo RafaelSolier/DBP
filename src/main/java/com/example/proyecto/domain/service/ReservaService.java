@@ -66,6 +66,7 @@ public class ReservaService {
         reserva.setCliente(cliente);
         reserva.setServicio(servicio);
         reserva.setFechaReserva(dto.getFechaReserva());
+        reserva.setDireccion(dto.getDireccion());
         reserva.setEstado(EstadoReserva.PENDIENTE);
         Reserva saved = reservaRepository.save(reserva);
         return modelMapper.map(saved, ReservaDTO.class);

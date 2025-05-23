@@ -7,6 +7,7 @@ import com.example.proyecto.exception.ConflictException;
 import com.example.proyecto.exception.ResourceNotFoundException;
 import com.example.proyecto.exception.UnauthorizedException;
 import com.example.proyecto.infrastructure.ClienteRepository;
+import com.example.proyecto.infrastructure.ReservaRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ public class ClienteService {
     private final JwtService jwtService;
     private final ServicioService servicioService;
     private final ReservaService reservaService;
+    private final ReservaRepository reservaRepository;
 
     public Cliente findById(Long id) {
         return clienteRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado "+ id));
@@ -64,6 +66,12 @@ public class ClienteService {
     }
 
     public List<ReservaDTO> misReservas(Long clienteId) {
+        // 1) Verificar existencia del cliente
+        clienteRepository.findById(clienteId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado"));
+
+        // 2) Si existe, delegar a ReservaService
         return reservaService.misReservas(clienteId);
     }
+
 }
