@@ -7,17 +7,17 @@ import java.math.BigDecimal;
 
 @Data
 public class ServicioRequestDto {
-    @NotBlank
+    @NotBlank(message = "El campo nombre no puede estar vacío")
     private String nombre;
 
-    @NotBlank
+    @NotBlank(message = "El campo descripcion no puede estar vacío")
     @Size(max = 2000)
     private String descripcion;
 
-    @NotNull
+    @NotNull(message = "El campo precio no puede estar vacío")
     private BigDecimal precio;
 
-    @NotBlank
+    @NotBlank(message = "El campo categoria no puede estar vacío")
     private String categoria;
 
     // Getters y setters

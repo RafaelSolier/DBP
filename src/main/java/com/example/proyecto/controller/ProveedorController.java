@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,11 +25,6 @@ public class ProveedorController {
     private final DisponibilidadService disponibilidadService;
     private final ReservaService reservaService;
 
-    @PostMapping("/proveedores")
-    public ResponseEntity<Void> crearProveedor(@Valid @RequestBody ProveedorRequestDto dto) {
-        proveedorService.registrar(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
 
     @PostMapping("/proveedores/{id}/servicios")
     public ResponseEntity<Void> agregarServicio(@PathVariable Long id,

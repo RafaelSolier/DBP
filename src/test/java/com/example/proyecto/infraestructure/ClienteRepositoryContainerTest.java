@@ -1,7 +1,9 @@
 // src/test/java/com/example/proyecto/infrastructure/ClienteRepositoryContainerTest.java
 package com.example.proyecto.infraestructure;
 import com.example.proyecto.domain.entity.Cliente;
+import com.example.proyecto.domain.entity.User;
 import com.example.proyecto.infrastructure.ClienteRepository;
+import com.example.proyecto.infrastructure.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -27,6 +29,7 @@ class ClienteRepositoryContainerTest {
 
     @Autowired
     private ClienteRepository clienteRepository;
+    private UserRepository userRepository;
 
     @DynamicPropertySource
     static void overrideProps(DynamicPropertyRegistry registry) {
@@ -38,15 +41,16 @@ class ClienteRepositoryContainerTest {
     @Test
     void saveAndFindByEmail_shouldReturnCliente() {
         Cliente c = new Cliente();
+        User user = new User();
         c.setNombre("Test");
         c.setApellido("User");
-        c.setEmail("test@ct.com");
+        user.setEmail("test@ct.com");
         c.setTelefono("123456");
-        c.setPassword("pwd");
+        user.setPassword("pwd");
         clienteRepository.save(c);
 
-        Optional<Cliente> found = clienteRepository.findByEmail("test@ct.com");
+        Optional<User> found = userRepository.findByEmail("test@ct.com");
         assertTrue(found.isPresent());
-        assertEquals("Test", found.get().getNombre());
+        assertEquals("Test", found.get().getEmail());
     }
 }

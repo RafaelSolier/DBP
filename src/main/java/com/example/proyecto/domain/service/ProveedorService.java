@@ -23,11 +23,6 @@ public class ProveedorService {
     private final ServicioRepository servicioRepository;
     private final ModelMapper modelMapper;
 
-    public void registrar(ProveedorRequestDto dto) {
-        Proveedor proveedor = modelMapper.map(dto, Proveedor.class);
-        proveedor.setRating(BigDecimal.ZERO);
-        proveedorRepository.save(proveedor);
-    }
 
     public void crearServicio(Long proveedorId, ServicioRequestDto dto) {
         Proveedor proveedor = proveedorRepository.findById(proveedorId)

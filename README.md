@@ -162,6 +162,12 @@ Disponibilidad crearDisponibilidad(DisponibilidadDto dto);
 | POST   | /api/resenas                | request body       | ReseñaRequestDto (DTO) | 201         | Permite al cliente añadir una calificación y comentario tras completar un servicio. |
 | GET    | /api/servicios/{id}/resenas | path parameter: id | Long (Entity id)       | 200         | Recupera todas las reseñas y puntuaciones asociadas a un servicio.                  |
 
+#### ReservaController
+
+| Método | Ruta                        | Parámetros         | Tipo Parámetros        | Código HTTP | Descripción                                                        |
+|--------|-----------------------------| ------------------ |------------------------|-------------|--------------------------------------------------------------------|
+| GET    | /api/reservas               | request body       | List<ReservaDto> (DTO) | 200         | Permite ver todas la reservas                                      |
+
 ---
 
 ## 📦 DTOs y Validaciones

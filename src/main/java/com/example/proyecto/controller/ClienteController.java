@@ -1,12 +1,14 @@
 package com.example.proyecto.controller;
 
 import com.example.proyecto.domain.service.ClienteService;
+import com.example.proyecto.domain.service.ReservaService;
 import com.example.proyecto.dto.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,20 +21,7 @@ import java.util.List;
 public class ClienteController {
 
     private final ClienteService clienteService;
-
-
-
-    @PostMapping("/clientes")
-    public ResponseEntity<ClienteDTO> registrar(@Valid @RequestBody ClienteRequestDTO dto) {
-        ClienteDTO created = clienteService.registrar(dto);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
-    }
-
-    @PostMapping("/clientes/login")
-    public ResponseEntity<TokenDTO> login(@Valid @RequestBody LoginDTO dto) {
-        TokenDTO token = clienteService.login(dto);
-        return ResponseEntity.ok(token);
-    }
+    private final ReservaService reservaService;
 
     @GetMapping("/servicios")
     public ResponseEntity<List<ServicioDTO>> buscarServicios(@Valid FiltroServicioDTO filtros) {
@@ -40,14 +29,13 @@ public class ClienteController {
         return ResponseEntity.ok(servicios);
     }
 
-    @PostMapping("/clientes/{id}/reservas")
+    @PostMapping("/clientes/{clienteId}/reservas")
     public ResponseEntity<ReservaDTO> crearReserva(
-            @PathVariable Long id,
+            @PathVariable Long clienteId,
             @Valid @RequestBody ReservaRequestDTO dto
     ) {
-        dto.setClienteId(id);
-        ReservaDTO reserva = clienteService.crearReserva(id, dto);
-        return new ResponseEntity<>(reserva, HttpStatus.CREATED);
+        ReservaDTO reserva = reservaService.crearReserva(clienteId, dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(reserva);
     }
 
     @PatchMapping("/clientes/{id}/reservas/{resId}/cancelar")

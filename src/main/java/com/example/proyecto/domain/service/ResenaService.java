@@ -43,12 +43,6 @@ public class ResenaService {
         // 3) Guardar y devolver DTO de respuesta
         Resena guardada = resenaRepository.save(resena);
         return modelMapper.map(guardada, ResenaDTO.class);
-        //        Resena resena = modelMapper.map(dto, Resena.class);
-//        resena.setServicio(servicio);
-//        resena.setCliente(cliente);
-//        resena.setFecha(LocalDateTime.now());
-//        Resena saved = resenaRepository.save(resena);
-//        return modelMapper.map(saved, ResenaDTO.class);
     }
 
     public List<ResenaDTO> obtenerResenasPorServicio(Long servicioId) {
