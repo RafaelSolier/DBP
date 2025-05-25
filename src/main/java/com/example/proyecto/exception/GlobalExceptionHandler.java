@@ -61,30 +61,43 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(buildBody(HttpStatus.NOT_FOUND, ex.getMessage()), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler({ UnauthorizedException.class, BadCredentialsException.class, UsernameNotFoundException.class, JwtException.class })
-    public ResponseEntity<?> handleUnauthorized(RuntimeException ex) {
-        return new ResponseEntity<>(buildBody(HttpStatus.UNAUTHORIZED, ex.getMessage()), HttpStatus.UNAUTHORIZED);
-    }
+//    @ExceptionHandler({ UnauthorizedException.class, BadCredentialsException.class, UsernameNotFoundException.class, JwtException.class })
+//    public ResponseEntity<?> handleUnauthorized(RuntimeException ex) {
+//        return new ResponseEntity<>(buildBody(HttpStatus.UNAUTHORIZED, ex.getMessage()), HttpStatus.UNAUTHORIZED);
+//    }
+@ExceptionHandler({
+        UnauthorizedException.class,
+        BadCredentialsException.class,
+        UsernameNotFoundException.class,
+        JwtException.class,
+        //InsufficientAuthenticationException.class   // ← lo añadimos aquí
+})
+public ResponseEntity<?> handleUnauthorized(Exception ex) {
+    return new ResponseEntity<>(
+            buildBody(HttpStatus.UNAUTHORIZED, ex.getMessage()),
+            HttpStatus.UNAUTHORIZED
+    );
+}
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<?> handleForbidden(AccessDeniedException ex) {
         return new ResponseEntity<>(buildBody(HttpStatus.FORBIDDEN, ex.getMessage()), HttpStatus.FORBIDDEN);
     }
 
-//    @ExceptionHandler(Exception.class)
-//    public ResponseEntity<?> handleAll(Exception ex) {
-//        return new ResponseEntity<>(buildBody(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred"), HttpStatus.INTERNAL_SERVER_ERROR);
-//    }
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleAll(Exception ex, HttpServletRequest request) {
-        // Log the exception for troubleshooting
-        log.error("Unhandled exception occurred", ex);
-        Map<String, Object> body = buildBody(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
-        body.put("path", request.getRequestURI());
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(body);
+    public ResponseEntity<?> handleAll(Exception ex) {
+        return new ResponseEntity<>(buildBody(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred"), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<?> handleAll(Exception ex, HttpServletRequest request) {
+//        // Log the exception for troubleshooting
+//        log.error("Unhandled exception occurred", ex);
+//        Map<String, Object> body = buildBody(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+//        body.put("path", request.getRequestURI());
+//        return ResponseEntity
+//                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                .body(body);
+//    }
 //    @ExceptionHandler({ UnauthorizedException.class,
 //            BadCredentialsException.class,
 //            UsernameNotFoundException.class,

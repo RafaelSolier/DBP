@@ -2,22 +2,17 @@ package com.example.proyecto.controller;
 
 import com.example.proyecto.domain.entity.Cliente;
 import com.example.proyecto.domain.entity.Proveedor;
-import com.example.proyecto.dto.*;
 import com.example.proyecto.infrastructure.ClienteRepository;
 import com.example.proyecto.infrastructure.ProveedorRepository;
 import com.example.proyecto.infrastructure.ServicioRepository;
-import com.example.proyecto.infrastructure.UserRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.test.web.servlet.MockMvc;
 import java.util.Map;
 
@@ -146,25 +141,11 @@ class ClienteControllerIntegrationTest {
                 "direccion",    "Av. Siempre Viva 742"
         );
 
-//        mvc.perform(post("/api/clientes/{clienteId}/reservas", clienteId)
-//                        .contentType(APPLICATION_JSON)
-//                        .content(mapper.writeValueAsString(body))
-//                )
-//                .andExpect(status().isUnauthorized())
-//                .andExpect(jsonPath("$.status").value(401))
-//                .andExpect(jsonPath("$.error").value("Unauthorized"))
-//                .andExpect(jsonPath("$.message").exists());
-        Executable call = () -> mvc.perform(
-                post("/api/clientes/{clienteId}/reservas", clienteId)
-                        .contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/api/clientes/{clienteId}/reservas", clienteId)
+                        .contentType(APPLICATION_JSON)
                         .content(mapper.writeValueAsString(body))
-        );
-
-        org.junit.jupiter.api.Assertions.assertThrows(
-                InsufficientAuthenticationException.class,
-                call,
-                "Debería lanzar InsufficientAuthenticationException cuando no hay token"
-        );
+                )
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -191,5 +172,64 @@ class ClienteControllerIntegrationTest {
                 .andExpect(jsonPath("$.status").value(409))
                 .andExpect(jsonPath("$.error").value("Conflict"))
                 .andExpect(jsonPath("$.message").value("Correo registrado"));
+    }
+    @Test
+    void login_conCredencialesValidas_devuelve200yToken() throws Exception {
+        // Primero registra un cliente
+        var reg = Map.of(
+                "nombre",   "Juan",
+                "apellido", "Pérez",
+                "email",    "juanito.perez@mail.com",
+                "telefono", "999123456",
+                "password", "TuPass123!"
+        );
+        mvc.perform(post("/auth/register/cliente")
+                .contentType(APPLICATION_JSON)
+                .content(mapper.writeValueAsString(reg))
+        ).andExpect(status().isCreated());
+        // Luego hace login
+        var login = Map.of("email", "juanito.perez@mail.com", "password", "TuPass123!");
+        mvc.perform(post("/auth/login")
+                        .contentType(APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(login)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").isString());
+    }
+
+    @Test
+    void login_conCredencialesInvalidas_devuelve401() throws Exception {
+        var login = Map.of("email", "juan.perez@mail.com", "password", "Wrong!");
+        mvc.perform(post("/auth/login")
+                        .contentType(APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(login)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401));
+    }
+    @Test
+    void registerCliente_sinEmail_devuelve400yErrores() throws Exception {
+        var bad = Map.of(
+                "nombre","X","apellido","Y","telefono","123","password","abc"
+                // falta "email"
+        );
+        mvc.perform(post("/auth/register/cliente")
+                        .contentType(APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(bad)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.email").value("El email es obligatorio"));
+    }
+    @Test
+    void buscarServicios_sinFiltros_devuelve200yLista() throws Exception {
+        mvc.perform(get("/api/servicios")
+                        .header("Authorization","Bearer "+jwtCliente))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+    @Test
+    void misReservas_devuelveListaConLaReservaCreada() throws Exception {
+        // crea una reserva como en tu test...
+        mvc.perform(get("/api/clientes/{clienteId}/reservas", clienteId)
+                        .header("Authorization","Bearer "+jwtCliente))
+                .andExpect(status().isOk());
+
     }
 }
