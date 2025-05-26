@@ -91,4 +91,8 @@ public class ReservaService {
                 .map(r -> modelMapper.map(r, ReservaDTO.class))
                 .collect(Collectors.toList());
     }
+
+    public List<Reserva> obtenerReservasPorProveedorYEstados(Long id, List<EstadoReserva> pendiente){
+        return reservaRepository.findByProveedorIdAndEstado(id, EstadoReserva.PENDIENTE);
+    }
 }
