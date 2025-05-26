@@ -47,7 +47,7 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
-                        .requestMatchers("/api/clientes/**").hasRole("CLIENTE")
+                        .requestMatchers("/api/clientes/**","/api/pagos/**","/api/resenas", "/api/servicios/**").hasRole("CLIENTE")
                         .requestMatchers("/api/proveedores/**").hasRole("PROVEEDOR")
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().denyAll()

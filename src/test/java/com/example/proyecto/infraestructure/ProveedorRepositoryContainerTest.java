@@ -2,52 +2,78 @@ package com.example.proyecto.infraestructure;
 
 import com.example.proyecto.domain.entity.Proveedor;
 import com.example.proyecto.domain.entity.User;
+import com.example.proyecto.domain.enums.Role;
 import com.example.proyecto.infrastructure.ProveedorRepository;
+import com.example.proyecto.infrastructure.UserRepository;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
 import java.util.Optional;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 @Testcontainers
 @DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ProveedorRepositoryContainerTest {
-   @Container
-   static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14-alpine")
-           .withDatabaseName("testdb")
-           .withUsername("test")
-           .withPassword("test");
+    @ServiceConnection
+    @Container
+    public static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15")
+            .withDatabaseName("testdb")
+            .withUsername("test")
+            .withPassword("test");
 
-   @Autowired
-   private ProveedorRepository proveedorRepository;
+    @Autowired
+    private ProveedorRepository proveedorRepository;
 
-   @DynamicPropertySource
-   static void overrideProps(DynamicPropertyRegistry registry) {
-       registry.add("spring.datasource.url",    postgres::getJdbcUrl);
-       registry.add("spring.datasource.username", postgres::getUsername);
-       registry.add("spring.datasource.password", postgres::getPassword);
-   }
+    @Autowired
+    private UserRepository userRepository;
 
-   @Test
-   void saveAndFindById_shouldReturnProveedor() {
-       Proveedor p = new Proveedor();
-       User user = new User();
-       p.setNombre("Proveedor Test");
-       user.setPassword("password");
-       user.setEmail("juanito@gmail.com");
-       p.setDescripcion("Soy proveedor de limpieza");
-       p.setTelefono("987654321");
-       proveedorRepository.save(p);
+    @BeforeAll
+    public void setup() {
+        proveedorRepository.deleteAll();
+        userRepository.deleteAll();
+    }
 
-       Optional<Proveedor> found = proveedorRepository.findById(p.getId());
-       assertTrue(found.isPresent());
-       assertEquals("Proveedor Test", found.get().getNombre());
-   }
+    @Test
+    public void saveAndFindByUserEmail() {
+        // Creación y guardado de User
+        User u = new User();
+        u.setEmail("tes@example.com");
+        u.setPassword("password123");
+        u.getRoles().add(Role.ROLE_PROVEEDOR);
+        User savedUser = userRepository.save(u);
+
+        // Creación y guardado de Cliente
+        Proveedor proveedor = new Proveedor();
+        proveedor.setUser(savedUser);
+        proveedor.setNombre("Test Cliente");
+        proveedor.setTelefono("123456789");
+        proveedor.setDescripcion("Test Cliente");
+        Proveedor savedClient = proveedorRepository.save(proveedor);
+
+        // Búsqueda por email de User
+        Optional<Proveedor> found = proveedorRepository.findByEmail("tes@example.com");
+        assertThat(found)
+                .as("Debe encontrar el proveedor a partir del email del User")
+                .isPresent();
+        Proveedor f = found.get();
+        assertThat(f.getId()).isEqualTo(savedClient.getId());
+        assertThat(f.getUser().getEmail()).isEqualTo("tes@example.com");
+    }
+
+    @Test
+    public void findByNonExistentUserEmail_returnsEmpty() {
+        Optional<Proveedor> opt = proveedorRepository.findByEmail("nope@example.com");
+        assertThat(opt)
+                .as("No debe encontrar nada para un email no existente")
+                .isEmpty();
+    }
 }

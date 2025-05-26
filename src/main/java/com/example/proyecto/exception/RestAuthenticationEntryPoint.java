@@ -26,11 +26,5 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
     ) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-//        Map<String,Object> body = new LinkedHashMap<>();
-//        body.put("timestamp", Instant.now());
-//        body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
-//        body.put("error", "Unauthorized");
-//        body.put("message", authException.getMessage());
-//        mapper.writeValue(response.getWriter(), body);
     }
 }
