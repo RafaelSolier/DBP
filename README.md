@@ -1,6 +1,155 @@
 ---
 
 # 🧹 Marketplace de Servicios Domésticos
+## CS 2031 – Desarrollo Basado en Plataforma  
+### Integrantes del equipo
+- **Rafael Oliverth Solier Soto**  
+- **Yulinio Zavala Mariño**  
+---
+## Índice
+1. [Introducción](#introducción)
+2. [Identificación del Problema o Necesidad](#identificación-del-problema-o-necesidad)
+3. [Descripción de la Solución](#descripción-de-la-solución)  
+   3.1. [Funcionalidades Implementadas](#funcionalidades-implementadas)  
+   3.2. [Tecnologías Utilizadas](#tecnologías-utilizadas)
+4. [Modelo de Entidades](#modelo-de-entidades)
+5. [Testing y Manejo de Errores](#testing-y-manejo-de-errores)
+6. [Medidas de Seguridad Implementadas](#medidas-de-seguridad-implementadas)
+7. [Eventos y Asincronía](#eventos-y-asincronía)
+8. [Uso de GitHub](#uso-de-github)
+9. [Conclusión](#conclusión)
+10. [Apéndices](#apéndices)
+## 📝 Descripción General
+---
+
+## Introducción
+
+**Contexto: ✏️**  
+En las zonas urbanas de Perú, encontrar rápidamente profesionales confiables para tareas domésticas —desde una simple limpieza profunda hasta reparaciones eléctricas de urgencia— continúa siendo un dolor de cabeza. La oferta de servicios suele estar dispersa en redes sociales, anuncios impresos o recomendaciones informales, lo que dificulta comparar precios, disponibilidad y reputación. Además, la informalidad del sector limita la transparencia y la seguridad tanto para clientes como para proveedores.
+
+**Objetivos del proyecto: 🎯**
+- Facilitar el **registro y acceso seguro** de clientes y proveedores.
+- Ofrecer a los proveedores una **vitrina digital** para publicar y administrar sus servicios domésticos.
+- Permitir a los clientes **descubrir, reservar y pagar** dichos servicios de forma sencilla.
+- Fomentar la **confianza** mediante un sistema transparente de reseñas y calificaciones tras cada servicio.
+
+---
+## Identificación del Problema o Necesidad
+
+**Descripción del problema: 🤔**  
+La informalidad y falta de estandarización en el mercado de servicios domésticos provoca frustración en los hogares: citaciones que nunca llegan, trabajos de mala calidad y sobrecostos de último minuto. Simultáneamente, miles de técnicos y especialistas capacitados carecen de un canal digital que les permita visibilizar su trabajo y escalar su negocio de manera formal.
+
+**Justificación: ✅**  
+Resolver esta brecha es clave para mejorar la calidad de vida en los hogares urbanos y formalizar la economía de los trabajadores del sector. Al conectar clientes y proveedores en un entorno regulado, con procesos de verificación y reputación, el proyecto reduce asimetrías de información, fomenta el empleo formal y contribuye a la profesionalización del servicio doméstico en el país.
+
+---
+## Descripción de la Solución
+La aplicación seguirá arquitectura hexagonal:
+```text 
+Controller → Service → Entities → Database
+        ↕          ↕       ↕
+     DTO/Mapper    Repository
+```
+### Funcionalidades Implementadas
+Tenemos que explicar
+### Tecnologías Utilizadas
+- **Java 17** & **Spring Boot 3.3**
+- Spring Modules: Web, Data JPA, Security, Validation, AOP
+- **PostgreSQL 15** + **HikariCP** para _pooling_ de conexiones
+- **JWT (JJJWT 0.11.5)** para autenticación _stateless_
+- **Lombok** para reducción de _boilerplate_
+- **Maven** como gestor de construcción
+- _Testing stack_: JUnit 5, Spring Boot Test, Mockito
+- _CI/CD_: GitHub Actions (build + test + report + Docker)
+- Contenedorización con **Docker 20.10**
+---
+### Modelo de Entidades
+
+### Testing y Manejo de Errores
+#### Pirámide de testing
+
+| Capa | Clases de prueba | Framework | Propósito |
+|------|-----------------|-----------|-----------|
+| **Unitarias – Dominio** | 8 | JUnit 5 | Valida reglas de entidades (`equals`, `hashCode`, restricciones de negocio). |
+| **Integración – Controladores** | 6 | `@SpringBootTest` + **MockMvc** | Ejecuta endpoints REST con contexto Spring completo y base H2 embebida. |
+| **Integración – Repositorios** | 3 | `@SpringBootTest` + **Testcontainers** | Verifica consultas JPA sobre un PostgreSQL 15 efímero. |
+| **Smoke** | 1 | `@SpringBootTest` | Comprueba que el contexto de la aplicación levanta correctamente. |
+
+> **Totales:** 18 clases de prueba ≈ 270 aserciones ·
+#### Manejo de errores
+El paquete `exception` centraliza y normaliza todas las fallas de la aplicación.
+
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ApiError> handleValidationErrors() { }
+
+  @ExceptionHandler(ResourceNotFoundException.class)
+  public ResponseEntity<ApiError> handleNotFound() { }
+
+  // Otros mapeos: ConflictException, JwtException, etc.
+}
+```
+
+| Escenario                 | Componente Spring                  | HTTP | Payload de Respuesta                                                                 |
+|--------------------------|------------------------------------|------|----------------------------------------------------------------------------------------|
+| **Validación DTO**       | `MethodArgumentNotValidException`  | 400  | `{ timestamp, status, errors[{field, message}], path }`                               |
+| **Recurso inexistente**  | `ResourceNotFoundException`        | 404  | `{ timestamp, status, error, message, path }`                                         |
+| **Conflicto de negocio** | `ConflictException`                | 409  | `{ timestamp, status, error, message, path }`                                         |
+| **Token ausente/expirado** | `RestAuthenticationEntryPoint`  | 401  | `{ timestamp, status, error: "Unauthorized", message, path }`                         |
+| **Permiso insuficiente** | `RestAccessDeniedHandler`          | 403  | `{ timestamp, status, error: "Forbidden", message, path }`                            |
+| **Errores JWT**          | `JwtException`                     | 401  | `Motivo del fallo (firma, expiración, etc.)`                                          |
+
+
+### Medidas de Seguridad Implementadas
+La seguridad en las aplicaciones es fundamental para proteger los datos sensibles, garantizar la integridad del sistema y prevenir accesos no autorizados. Las siguientes medidas han sido implementadas para ofrecer una arquitectura robusta y alineada con buenas prácticas de desarrollo seguro.
+| **Capa**            | **Medida**               | **Detalle**                                                                 |
+|---------------------|---------------------------|------------------------------------------------------------------------------|
+| **Autenticación**   | JWT                       | Tokens HS512, exp. 60 min; endpoint de _refresh_.                           |
+| **Almacenamiento**  | BCrypt 12                 | _Hash_ y _salt_ de contraseñas.                                             |
+| **Autorización**    | Spring Method Security    | `@PreAuthorize` para proteger recursos.                                     |
+| **Datos en tránsito** | HTTPS                   | Configurado en proxy Nginx.                                                 |
+| **Validación**      | Bean Validation           | `@NotBlank`, `@Email`; respuestas 400 uniformes.                            |
+| **Prevención**      | JPQL parametrizado, CORS  | CORS restrictivo, filtro XSS básico.                                        |
+
+### Eventos y Asincronía
+En **Marketplace**, los eventos y la asincronía juegan un papel importante para mejorar la eficiencia del sistema, especialmente en tareas que no requieren una respuesta inmediata. El envío de correos electrónicos es uno de los principales ejemplos de este enfoque. En lugar de procesar estas tareas de manera síncrona, lo cual podría generar demoras innecesarias para el usuario, se ejecutan en segundo plano, permitiendo que la experiencia sea más fluida.
+#### Casos de uso del envío de correos electrónicos:
+1. Registro de un nuevo Cliente/proveedor:
+- Cuando un nuevo usuario se registra en la plataforma, se dispara un evento que envía de forma asíncrona un correo electrónico de bienvenida. Este correo confirma el registro del Cliente/Proveedor y proporciona información útil para comenzar a interactuar en la plataforma. El envío de este correo en segundo plano permite que el usuario complete el proceso de registro sin esperas innecesarias.
+2. Rafita:
+
+### Uso de GitHub
+El desarrollo de **Marketplace** se gestionó de forma colaborativa utilizando **GitHub**, empleando un flujo de trabajo basado en ramas, issues y pull requests para organizar y revisar el trabajo de todo el equipo.
+
+#### 🗂️Ramas (Branches)
+Cada nueva funcionalidad o corrección de errores se desarrolló en **ramas independientes** para evitar conflictos con la rama principal (`main`). Esto permitió que los miembros del equipo trabajaran en paralelo de manera eficiente y ordenada.
+
+#### 📌 Issues
+Se utilizaron **issues** para:
+
+- Asignar tareas
+- Reportar errores
+- Gestionar el progreso del proyecto
+#### 🔄 Pull Requests
+Antes de fusionar cualquier cambio en la rama principal, se creaba un **pull request (PR)**.  Esto permitió que los cambios fueran revisados y discutidos por el equipo, asegurando la **calidad del código** antes de su integración.
+
+#### ✅ Beneficios del Flujo de Trabajo
+
+Este flujo de trabajo colaborativo permitió:
+
+- Mantener el proyecto **organizado**
+- Mejorar la calidad del código mediante **revisiones**
+- Asegurar una **integración continua sin problemas**
+---
+## Conclusión
+---
+## Apéndices
+**Licencia:** MIT  
+**Referencias:** Spring Boot Reference, Baeldung, apuntes del curso
+
 
 De aquí para abajo es el contenido del README.md antiguo, que tiene algunas cosas que se usarán.
 
