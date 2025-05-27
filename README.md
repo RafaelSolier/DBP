@@ -162,8 +162,13 @@ El desarrollo de **Marketplace de Servicios Domésticos** ha materializado una p
 - **Monetización y fidelización:** Implementar planes premium para proveedores y un sistema de puntos o descuentos para clientes recurrentes.
 ---
 ## Apéndices
-**Licencia:** MIT  
-**Referencias:** Spring Boot Reference, apuntes del curso
+### Licencia
+**Marketplace de Servicios Domésticos** está bajo la licencia MIT.
+### Referencias
+
+- Documentación de Node.js: <https://nodejs.org/>
+- Documentación de PostgreSQL: <https://www.postgresql.org/docs/>
+- Spring Boot Reference, apuntes del curso
 
 
 De aquí para abajo es el contenido del README.md antiguo, que tiene algunas cosas que se usarán.
