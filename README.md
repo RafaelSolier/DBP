@@ -1,5 +1,3 @@
----
-
 # 🧹 Marketplace de Servicios Domésticos
 ## CS 2031 – Desarrollo Basado en Plataforma  
 ### Integrantes del equipo
