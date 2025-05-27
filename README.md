@@ -51,19 +51,20 @@ Controller → Service → Entities → Database
 ### Funcionalidades Implementadas
 Tenemos que explicar
 ### Tecnologías Utilizadas
-- **Java 17** & **Spring Boot 3.3**
-- Spring Modules: Web, Data JPA, Security, Validation, AOP
-- **PostgreSQL 15** + **HikariCP** para _pooling_ de conexiones
-- **JWT (JJJWT 0.11.5)** para autenticación _stateless_
-- **Lombok** para reducción de _boilerplate_
-- **Maven** como gestor de construcción
-- _Testing stack_: JUnit 5, Spring Boot Test, Mockito
-- _CI/CD_: GitHub Actions (build + test + report + Docker)
-- Contenedorización con **Docker 20.10**
+- **Java 17 + Spring Boot 3.3** → núcleo del backend y arranque rápido.
+- **Spring Starters** (Web, Data JPA, Security, Validation, AOP) → HTTP, persistencia, seguridad y validación listos “out-of-the-box”.
+- **PostgreSQL 15** (producción) + **HikariCP** → base de datos robusta con *pool* de conexiones veloz.
+- **H2 en memoria** + **Testcontainers** → pruebas locales e integración sin depender de una DB externa.
+- **JWT** + **BCrypt 12** → autenticación *stateless* y contraseñas seguras.
+- **Lombok** → elimina getters/setters y reduce código repetitivo.
+- **Maven** → compila, prueba y empaqueta con un solo comando.
+- **JUnit 5 + Spring Boot Test + Mockito** → pruebas unitarias e integración automatizadas.
+- **GitHub Actions** → ejecuta build, tests y crea la imagen Docker en cada *push*.
+- **Docker 20.10** → despliegue idéntico en cualquier servidor.
 ---
-### Modelo de Entidades
-
-### Testing y Manejo de Errores
+## Modelo de Entidades
+falta realizar
+## Testing y Manejo de Errores
 #### Pirámide de testing
 
 | Capa | Clases de prueba | Framework | Propósito |
@@ -91,17 +92,18 @@ public class GlobalExceptionHandler {
 }
 ```
 
-| Escenario                 | Componente Spring                  | HTTP | Payload de Respuesta                                                                 |
-|--------------------------|------------------------------------|------|----------------------------------------------------------------------------------------|
-| **Validación DTO**       | `MethodArgumentNotValidException`  | 400  | `{ timestamp, status, errors[{field, message}], path }`                               |
-| **Recurso inexistente**  | `ResourceNotFoundException`        | 404  | `{ timestamp, status, error, message, path }`                                         |
-| **Conflicto de negocio** | `ConflictException`                | 409  | `{ timestamp, status, error, message, path }`                                         |
-| **Token ausente/expirado** | `RestAuthenticationEntryPoint`  | 401  | `{ timestamp, status, error: "Unauthorized", message, path }`                         |
-| **Permiso insuficiente** | `RestAccessDeniedHandler`          | 403  | `{ timestamp, status, error: "Forbidden", message, path }`                            |
-| **Errores JWT**          | `JwtException`                     | 401  | `Motivo del fallo (firma, expiración, etc.)`                                          |
+| Escenario      | Componente Spring               | HTTP | Payload de Respuesta                          |
+|---------------|---------------------------------|------|-----------------------------------------------|
+| **Validación DTO** | `MethodArgumentNotValidException` | 400  | `{ timestamp, status, errors[{field, message}], path }` |
+| **Recurso inexistente** | `ResourceNotFoundException`     | 404  | `{ timestamp, status, error, message, path }` |
+| **Conflicto de negocio** | `ConflictException`             | 409  | `{ timestamp, status, error, message, path }` |
+| **Token ausente/expirado** | `RestAuthenticationEntryPoint`  | 401  | `{ timestamp, status, error: "Unauthorized", message, path }` |
+| **Permiso insuficiente** | `RestAccessDeniedHandler`       | 403  | `{ timestamp, status, error: "Forbidden", message, path }` |
+| **Errores JWT** | `JwtException`                  | 401  | `Motivo del fallo (firma, expiración, etc.)`  |
+| **Internal Server Error**          | `Exception`                     | 500  | `Error inesperado`                                           |
+    
 
-
-### Medidas de Seguridad Implementadas
+## Medidas de Seguridad Implementadas
 La seguridad en las aplicaciones es fundamental para proteger los datos sensibles, garantizar la integridad del sistema y prevenir accesos no autorizados. Las siguientes medidas han sido implementadas para ofrecer una arquitectura robusta y alineada con buenas prácticas de desarrollo seguro.
 | **Capa**            | **Medida**               | **Detalle**                                                                 |
 |---------------------|---------------------------|------------------------------------------------------------------------------|
@@ -112,14 +114,14 @@ La seguridad en las aplicaciones es fundamental para proteger los datos sensible
 | **Validación**      | Bean Validation           | `@NotBlank`, `@Email`; respuestas 400 uniformes.                            |
 | **Prevención**      | JPQL parametrizado, CORS  | CORS restrictivo, filtro XSS básico.                                        |
 
-### Eventos y Asincronía
+## Eventos y Asincronía
 En **Marketplace**, los eventos y la asincronía juegan un papel importante para mejorar la eficiencia del sistema, especialmente en tareas que no requieren una respuesta inmediata. El envío de correos electrónicos es uno de los principales ejemplos de este enfoque. En lugar de procesar estas tareas de manera síncrona, lo cual podría generar demoras innecesarias para el usuario, se ejecutan en segundo plano, permitiendo que la experiencia sea más fluida.
 #### Casos de uso del envío de correos electrónicos:
 1. Registro de un nuevo Cliente/proveedor:
 - Cuando un nuevo usuario se registra en la plataforma, se dispara un evento que envía de forma asíncrona un correo electrónico de bienvenida. Este correo confirma el registro del Cliente/Proveedor y proporciona información útil para comenzar a interactuar en la plataforma. El envío de este correo en segundo plano permite que el usuario complete el proceso de registro sin esperas innecesarias.
 2. Rafita:
 
-### Uso de GitHub
+## Uso de GitHub
 El desarrollo de **Marketplace** se gestionó de forma colaborativa utilizando **GitHub**, empleando un flujo de trabajo basado en ramas, issues y pull requests para organizar y revisar el trabajo de todo el equipo.
 
 #### 🗂️Ramas (Branches)
@@ -143,10 +145,25 @@ Este flujo de trabajo colaborativo permitió:
 - Asegurar una **integración continua sin problemas**
 ---
 ## Conclusión
+### Logros del Proyecto: 📝
+El desarrollo de **Marketplace de Servicios Domésticos** ha materializado una plataforma que conecta de forma segura y transparente a hogares con técnicos y especialistas confiables. Se integraron módulos completos de autenticación JWT, catálogo y reserva de servicios, pagos simulados y un sistema de reputación que reduce la informalidad del sector. Gracias a ello, los clientes pueden contratar mano de obra calificada con unos pocos clics, mientras que los proveedores obtienen visibilidad y un canal formal de ingresos. El despliegue automatizado vía GitHub Actions y Docker garantiza que la aplicación sea repetible y fácil de escalar.
+
+### Aprendizajes Clave: 📚
+- **Diseño Hexagonal:** Separar dominio, infraestructura y puertos REST nos facilitó las pruebas y dio flexibilidad para cambios futuros.
+- **Seguridad End-to-End:** Implementar Spring Security con JWT y BCrypt nos enseñó buenas prácticas de cifrado y manejo de sesiones _stateless_.
+- **CI/CD en la nube:** Automatizar compilación, pruebas y empaquetado Docker en cada _push_ nos demostró la importancia de la entrega continua para mantener la calidad.
+- **Trabajo Colaborativo en GitHub Projects:** La gestión de issues y _pull requests_ con revisiones cruzadas fomentó feedback constante y detección temprana de bugs.
+
+### Trabajo Futuro: 🚀
+- **Pagos en tiempo real:** Integrar una pasarela como Culqi o Mercado Pago para transacciones reales.
+- **Geolocalización y horarios en vivo:** Mostrar proveedores cercanos y disponibilidad en tiempo real mediante sockets.
+- **Chat cliente-proveedor:** Habilitar mensajería directa y envío de fotos antes de la visita.
+- **Facturación electrónica SUNAT:** Generar comprobantes válidos para proveedores formalizados.
+- **Monetización y fidelización:** Implementar planes premium para proveedores y un sistema de puntos o descuentos para clientes recurrentes.
 ---
 ## Apéndices
 **Licencia:** MIT  
-**Referencias:** Spring Boot Reference, Baeldung, apuntes del curso
+**Referencias:** Spring Boot Reference, apuntes del curso
 
 
 De aquí para abajo es el contenido del README.md antiguo, que tiene algunas cosas que se usarán.
