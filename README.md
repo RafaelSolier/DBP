@@ -111,7 +111,7 @@ La seguridad en las aplicaciones es fundamental para proteger los datos sensible
 | **Almacenamiento**  | BCrypt 12                 | _Hash_ y _salt_ de contraseñas.                                             |
 | **Autorización**    | Spring Method Security    | `@PreAuthorize` para proteger recursos.                                     |
 | **Datos en tránsito** | HTTPS                   | Configurado en proxy Nginx.                                                 |
-| **Validación**      | Bean Validation           | `@NotBlank`, `@Email`; respuestas 400 uniformes.                            |
+| **Validación**      | Bean Validation           | `@NotBlank`, `@Email`,`@Valid`,`@Size`,`@Min`,`@Max`; respuestas 400 uniformes.                            |
 | **Prevención**      | JPQL parametrizado, CORS  | CORS restrictivo, filtro XSS básico.                                        |
 
 ## Eventos y Asincronía
