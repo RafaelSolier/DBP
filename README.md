@@ -2,7 +2,8 @@
 
 # 🧹 Marketplace de Servicios Domésticos
 
-## 📝 Descripción General
+De aquí para abajo es el contenido del README.md antiguo, que tiene algunas cosas que se usarán.
+
 
 El proyecto tiene como objetivo desarrollar una aplicación web y móvil tipo marketplace que conecte a usuarios con proveedores de servicios domésticos como plomería, electricidad, limpieza, entre otros. El sistema permitirá a los clientes buscar servicios por categoría y ubicación, realizar reservas en tiempo real, gestionar pagos y dejar reseñas, mientras que los proveedores podrán administrar sus servicios, horarios y visualizar su historial laboral.
 
