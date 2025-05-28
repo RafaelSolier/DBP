@@ -27,10 +27,10 @@ public class ProveedorController {
 
 
     @PostMapping("/proveedores/{id}/servicios")
-    public ResponseEntity<Void> agregarServicio(@PathVariable Long id,
+    public ResponseEntity<ServicioDTO> agregarServicio(@PathVariable Long id,
                                                 @Valid @RequestBody ServicioRequestDto dto) {
-        proveedorService.crearServicio(id, dto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        ServicioDTO servicio = proveedorService.crearServicio(id, dto).get(0);
+        return ResponseEntity.status(HttpStatus.CREATED).body(servicio);
     }
 
     @PutMapping("/servicios/{id}")

@@ -56,7 +56,7 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword())
         );
         String token = tokenProvider.generateToken(auth);
-        return new AuthResponseDto(token);
+        return new AuthResponseDto(token,c.getId());
     }
 
     @Transactional
@@ -81,7 +81,7 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword())
         );
         String token = tokenProvider.generateToken(auth);
-        return new AuthResponseDto(token);
+        return new AuthResponseDto(token,p.getId());
     }
     @Transactional
     public AuthResponseDto login(LoginDTO dto) {
@@ -93,6 +93,22 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword())
         );
         String token = tokenProvider.generateToken(auth);
-        return new AuthResponseDto(token);
+        //realiza un if, para que verifique si el cliente o Proveedor y de esa manera exponer
+        //el id correspondiente, esto se puede hacer mediante email-
+        //return new AuthResponseDto(token);
+        User user = userRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new UnauthorizedException("Correo no registrado"));
+
+        if (user.getRoles().contains(Role.ROLE_CLIENTE)) {
+            Cliente cliente = clienteRepository.findByEmail(user.getEmail())
+                    .orElseThrow(() -> new UnauthorizedException("Cliente no encontrado"));
+            return new AuthResponseDto(token, cliente.getId());
+        } else if (user.getRoles().contains(Role.ROLE_PROVEEDOR)) {
+            Proveedor proveedor = proveedorRepository.findByEmail(user.getEmail())
+                    .orElseThrow(() -> new UnauthorizedException("Proveedor no encontrado"));
+            return new AuthResponseDto(token, proveedor.getId());
+        } else {
+            throw new UnauthorizedException("Rol no válido");
+        }
     }
 }
