@@ -4,28 +4,24 @@ import com.example.proyecto.domain.entity.Pago;
 import com.example.proyecto.domain.entity.Reserva;
 import com.example.proyecto.dto.PagoDTO;
 import com.example.proyecto.dto.PagoRequestDTO;
+import com.example.proyecto.email.events.PaymentEmailEvent;
 import com.example.proyecto.exception.ResourceNotFoundException;
 import com.example.proyecto.infrastructure.PagoRepository;
 import com.example.proyecto.infrastructure.ReservaRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class PagoService {
     private final PagoRepository pagoRepository;
     private final ReservaRepository reservaRepository;
     private final ModelMapper modelMapper;
-
-    @Autowired
-    public PagoService(PagoRepository pagoRepository,
-                       ReservaRepository reservaRepository,
-                       ModelMapper modelMapper) {
-        this.pagoRepository = pagoRepository;
-        this.reservaRepository = reservaRepository;
-        this.modelMapper = modelMapper;
-    }
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public PagoDTO procesarPago(Long reservaId, PagoRequestDTO dto) {
@@ -38,6 +34,23 @@ public class PagoService {
         Pago saved = pagoRepository.save(pago);
         reserva.setPago(saved);
         reservaRepository.save(reserva);
+        // Enviar correo al cliente
+        eventPublisher.publishEvent(new PaymentEmailEvent(this, reserva.getCliente().getNombre(),
+                reserva.getCliente().getUser().getEmail(),
+                pago.getMonto(),
+                reserva.getServicio().getProveedor().getUser().getEmail(),
+                reserva.getFechaReserva(),
+                reserva.getDireccion(),
+                reserva.getServicio().getNombre()));
+        // Enviar correo al proveedor
+        eventPublisher.publishEvent(new PaymentEmailEvent(this, reserva.getCliente().getNombre(),
+                reserva.getServicio().getProveedor().getUser().getEmail(),
+                pago.getMonto(),
+                reserva.getServicio().getProveedor().getNombre(),
+                reserva.getFechaReserva(),
+                reserva.getDireccion(),
+                reserva.getServicio().getNombre()));
+
         return modelMapper.map(saved, PagoDTO.class);
     }
 }

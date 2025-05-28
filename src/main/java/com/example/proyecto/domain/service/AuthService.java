@@ -9,6 +9,7 @@ import com.example.proyecto.dto.AuthResponseDto;
 import com.example.proyecto.dto.ClienteRequestDTO;
 import com.example.proyecto.dto.LoginDTO;
 import com.example.proyecto.dto.ProveedorRequestDto;
+import com.example.proyecto.email.events.WelcomeEmailEvent;
 import com.example.proyecto.exception.ConflictException;
 import com.example.proyecto.exception.UnauthorizedException;
 import com.example.proyecto.infrastructure.ClienteRepository;
@@ -16,6 +17,7 @@ import com.example.proyecto.infrastructure.ProveedorRepository;
 import com.example.proyecto.infrastructure.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -31,6 +33,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public AuthResponseDto registerCliente(ClienteRequestDTO dto) {
@@ -56,6 +59,7 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword())
         );
         String token = tokenProvider.generateToken(auth);
+        eventPublisher.publishEvent(new WelcomeEmailEvent(this, dto.getEmail(), dto.getNombre()));
         return new AuthResponseDto(token,c.getId());
     }
 
@@ -81,6 +85,7 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword())
         );
         String token = tokenProvider.generateToken(auth);
+        eventPublisher.publishEvent(new WelcomeEmailEvent(this, dto.getEmail(), dto.getNombre()));
         return new AuthResponseDto(token,p.getId());
     }
     @Transactional
