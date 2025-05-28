@@ -87,6 +87,8 @@ La capa de dominio incluye las siguientes entidades principales:
 * **Reseña**: `id`, `calificacion`, `comentario`, `fecha`; ManyToOne con Cliente y Servicio.
 
 ## Testing y Manejo de Errores
+#### Colección de Postman
+Se incluye un una colección de Postman con todos los endpoints implementados. (Se debe configurar localhost como base y agregar a variable global)
 #### Pirámide de testing
 
 | Capa | Clases de prueba | Framework | Propósito |
