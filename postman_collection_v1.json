@@ -5,7 +5,7 @@
 		"description": "Colección ajustada según las rutas y validaciones reales del proyecto Spring Boot",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "43499216",
-		"_collection_link": "https://yulinio.postman.co/workspace/Yulinio-'s-Workspace~af4968b1-ad8e-4e69-8f31-493458381d4e/collection/43499216-347bc6b6-886d-4137-a8d5-748ccdaa4846?action=share&source=collection_link&creator=43499216"
+		"_collection_link": "https://yulinio.postman.co/workspace/af4968b1-ad8e-4e69-8f31-493458381d4e/collection/43499216-347bc6b6-886d-4137-a8d5-748ccdaa4846?action=share&source=collection_link&creator=43499216"
 	},
 	"item": [
 		{
@@ -14,7 +14,6 @@
 				{
 					"listen": "test",
 					"script": {
-						"type": "text/javascript",
 						"exec": [
 							"pm.test(\"RegistrarProveedor responde 2xx\", function () {",
 							"    pm.response.to.be.success;",
@@ -23,7 +22,9 @@
 							"  const data = pm.response.json();",
 							"  if (data.id) pm.environment.set(\"proveedorId\", data.id);",
 							"} catch(e) {}"
-						]
+						],
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -70,9 +71,11 @@
 							"pm.test(\"Login Proveedor exitoso\", function () {",
 							"    pm.response.to.have.status(200);",
 							"    pm.expect(jsonData.token).to.exist;",
+							"    pm.expect(jsonData.id).to.exist;",
 							"});",
 							"",
-							"pm.environment.set(\"jwt_token_proveedor\", jsonData.token);"
+							"pm.environment.set(\"jwt_token_proveedor\", jsonData.token);",
+							"pm.environment.set(\"proveedorId\",jsonData.id);"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -160,17 +163,20 @@
 				{
 					"listen": "test",
 					"script": {
-						"type": "text/javascript",
 						"exec": [
 							"let jsonData = pm.response.json();",
 							"",
 							"pm.test(\"Login Cliente exitoso\", function () {",
 							"    pm.response.to.have.status(200);",
 							"    pm.expect(jsonData.token).to.exist;",
+							"    pm.expect(jsonData.id).to.exist;",
 							"});",
 							"",
-							"pm.environment.set(\"jwt_token_cliente\", jsonData.token);"
-						]
+							"pm.environment.set(\"jwt_token_cliente\", jsonData.token);",
+							"pm.environment.set(\"clienteId\",jsonData.id);"
+						],
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -205,16 +211,20 @@
 				{
 					"listen": "test",
 					"script": {
-						"type": "text/javascript",
 						"exec": [
+							"let jsonData = pm.response.json();",
 							"pm.test(\"Agregar Servicio al Proveedor responde 2xx\", function () {",
 							"    pm.response.to.be.success;",
+							"    pm.expect(jsonData.id).to.exist;",
 							"});",
-							"try {",
-							"  const data = pm.response.json();",
-							"  if (data.id) pm.environment.set(\"servicioId\", data.id);",
-							"} catch(e) {}"
-						]
+							"pm.environment.set(\"servicioId\",jsonData.id);",
+							"// try {",
+							"//   const data = pm.response.json();",
+							"//   if (data.id) pm.environment.set(\"servicioId\", data.id);",
+							"// } catch(e) {}"
+						],
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -351,13 +361,17 @@
 					"listen": "test",
 					"script": {
 						"exec": [
+							"let jsonData = pm.response.json();",
 							"pm.test(\"Crear Reserva Cliente responde 2xx\", function () {",
 							"    pm.response.to.be.success;",
+							"    pm.expect(jsonData.id).to.exist;",
+							"    ",
 							"});",
-							"try {",
-							"  const data = pm.response.json();",
-							"  if (data.id) pm.environment.set(\"reservaId\", data.id);",
-							"} catch(e) {}"
+							"pm.environment.set(\"reservaId\",jsonData.id);",
+							"// try {",
+							"//   const data = pm.response.json();",
+							"//   if (data.id) pm.environment.set(\"reservaId\", data.id);",
+							"// } catch(e) {}"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -402,13 +416,13 @@
 					"listen": "test",
 					"script": {
 						"exec": [
+							"let jsonData = pm.response.json();",
 							"pm.test(\"Crear Reserva Cliente responde 2xx\", function () {",
 							"    pm.response.to.be.success;",
+							"    pm.expect(jsonData.id).to.exist;",
+							"    ",
 							"});",
-							"try {",
-							"  const data = pm.response.json();",
-							"  if (data.id) pm.environment.set(\"reservaId\", data.id);",
-							"} catch(e) {}"
+							"pm.environment.set(\"reservaId\",jsonData.id);"
 						],
 						"type": "text/javascript",
 						"packages": {}
