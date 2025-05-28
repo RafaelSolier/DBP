@@ -5,20 +5,20 @@ import lombok.Data;
 
 @Data
 public class ProveedorRequestDto {
-    @NotBlank
+    @NotBlank(message = "El nombre es obligatorio")
     private String nombre;
 
     @Email
-    @NotBlank
+    @NotBlank(message = "El email es obligatorio")
     private String email;
 
-    @NotBlank
+    @NotBlank(message = "La contraseña es obligatoria")
     private String password;
 
     @Size(max = 2000)
     private String descripcion;
-
-    @Size(max = 100)
+    @NotBlank(message = "El telefono es obligatorio")
+    @Size(max = 12)
     private String telefono;
 
     // Getters y setters

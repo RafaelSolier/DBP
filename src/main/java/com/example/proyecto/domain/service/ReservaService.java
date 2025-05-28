@@ -8,11 +8,15 @@ import com.example.proyecto.dto.ReservaDTO;
 import com.example.proyecto.dto.ReservaRequestDTO;
 import com.example.proyecto.exception.ConflictException;
 import com.example.proyecto.exception.ResourceNotFoundException;
+import com.example.proyecto.infrastructure.ClienteRepository;
 import com.example.proyecto.infrastructure.ReservaRepository;
+import com.example.proyecto.infrastructure.ServicioRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,12 +27,13 @@ import java.util.stream.Collectors;
 public class ReservaService {
 
     private final ReservaRepository reservaRepository;
-    private final ClienteService clienteService;
+    private final ClienteRepository clienteRepository;
     private final ServicioService servicioService;
     private final ModelMapper modelMapper;
+    private final ServicioRepository servicioRepository;
 
-    public List<ReservaDTO> obtenerReservasPorProveedor(Long proveedorId) {
-        List<Reserva> reservas = reservaRepository.findByServicioProveedorId(proveedorId);
+    public List<ReservaDTO> obtenerReservasPorProveedorYEstados(Long proveedorId, List<EstadoReserva> estados) {
+        List<Reserva> reservas = reservaRepository.findByServicioProveedorIdAndEstadoIn(proveedorId, estados);
         return reservas.stream()
                 .map(r -> modelMapper.map(r, ReservaDTO.class))
                 .collect(Collectors.toList());
@@ -57,16 +62,19 @@ public class ReservaService {
         return modelMapper.map(updated, ReservaDTO.class);
     }
 
-    public ReservaDTO crearReserva(ReservaRequestDTO dto) {
-        Cliente cliente = clienteService.findById(dto.getClienteId());
-        Servicio servicio = servicioService.findById(dto.getServicioId());
+    public ReservaDTO crearReserva(Long clienteId,ReservaRequestDTO dto) {
+        Cliente cliente = clienteRepository.findById(clienteId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado"));
+        Servicio servicio = servicioRepository.findById(dto.getServicioId())
+                .orElseThrow(() -> new ResourceNotFoundException("Servicio no encontrado"));
         Reserva reserva = new Reserva();
         reserva.setCliente(cliente);
         reserva.setServicio(servicio);
         reserva.setFechaReserva(dto.getFechaReserva());
+        reserva.setDireccion(dto.getDireccion());
         reserva.setEstado(EstadoReserva.PENDIENTE);
-        Reserva saved = reservaRepository.save(reserva);
-        return modelMapper.map(saved, ReservaDTO.class);
+        reservaRepository.save(reserva);
+        return modelMapper.map(reserva, ReservaDTO.class);
     }
 
     @Transactional
@@ -92,7 +100,10 @@ public class ReservaService {
                 .collect(Collectors.toList());
     }
 
-    public List<Reserva> obtenerReservasPorProveedorYEstados(Long id, List<EstadoReserva> pendiente){
-        return reservaRepository.findByProveedorIdAndEstado(id, EstadoReserva.PENDIENTE);
+    public List<ReservaDTO> listarTodas() {
+        List<Reserva> reservas = reservaRepository.findAll();
+        return reservas.stream()
+                .map(reserva -> modelMapper.map(reserva, ReservaDTO.class))
+                .collect(Collectors.toList());
     }
 }

@@ -20,14 +20,8 @@ public class Cliente {
     @Column(nullable = false)
     private String apellido;
 
-    @Column(nullable = false, unique = true)
-    private String email;
-
     @Column(nullable = false)
     private String telefono;
-
-    @Column(nullable = false)
-    private String password;
 
     private String foto;
 
@@ -39,5 +33,9 @@ public class Cliente {
 
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Resena> resenas;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
     // getters y setters
 }

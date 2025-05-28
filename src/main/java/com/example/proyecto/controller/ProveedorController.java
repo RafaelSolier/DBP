@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,17 +25,12 @@ public class ProveedorController {
     private final DisponibilidadService disponibilidadService;
     private final ReservaService reservaService;
 
-    @PostMapping("/proveedores")
-    public ResponseEntity<Void> crearProveedor(@Valid @RequestBody ProveedorRequestDto dto) {
-        proveedorService.registrar(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
 
     @PostMapping("/proveedores/{id}/servicios")
-    public ResponseEntity<Void> agregarServicio(@PathVariable Long id,
+    public ResponseEntity<ServicioDTO> agregarServicio(@PathVariable Long id,
                                                 @Valid @RequestBody ServicioRequestDto dto) {
-        proveedorService.crearServicio(id, dto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        ServicioDTO servicio = proveedorService.crearServicio(id, dto).get(0);
+        return ResponseEntity.status(HttpStatus.CREATED).body(servicio);
     }
 
     @PutMapping("/servicios/{id}")
@@ -56,7 +52,7 @@ public class ProveedorController {
     @GetMapping("/proveedores/{id}/reservas")
     public ResponseEntity<List<ReservaDTO>> obtenerReservas(@PathVariable Long id) {
         List<ReservaDTO> reservas = reservaService.obtenerReservasPorProveedorYEstados(
-                id, List.of(EstadoReserva.PENDIENTE, EstadoReserva.ACEPTADA));
+                id, List.of(EstadoReserva.PENDIENTE, EstadoReserva.ACEPTADA,EstadoReserva.CANCELADA,EstadoReserva.COMPLETADA ));
         return ResponseEntity.ok(reservas);
     }
 
