@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Reserva</title>
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .details {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>¡Reserva Confirmada!</h1>
+</div>
+<div class="content">
+    <p>Hola <span th:text="${nameCliente}">[Nombre Cliente]</span>,</p>
+    <p>Tu reserva para <span th:text="${nombreServicio}">[Nombre Servicio]</span> ha sido confirmada por <span th:text="${nameProveedor}">[Nombre Proveedor]</span>.</p>
+
+    <div class="details">
+        <h3>Detalles de la Reserva:</h3>
+        <p><strong>Fecha:</strong> <span th:text="${fecha}">[Fecha Reserva]</span></p>
+    </div>
+
+    <p>Para completar la reserva, por favor realiza el pago en las próximas 24 horas.</p>
+    <a href="[URL_DE_PAGO]" class="button">Realizar Pago</a>
+
+    <p>Si tienes alguna pregunta, no dudes en contactarnos.</p>
+    <p>Atentamente,<br>El equipo de ServiMatch</p>
+</div>
+<div class="footer">
+    <p>© 2025 ServiMatch. Todos los derechos reservados.</p>
+    <p>Este es un correo automático, por favor no respondas a este mensaje.</p>
+</div>
+</body>
+</html>

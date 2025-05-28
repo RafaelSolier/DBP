@@ -6,6 +6,7 @@ import com.example.proyecto.domain.entity.Servicio;
 import com.example.proyecto.domain.enums.EstadoReserva;
 import com.example.proyecto.dto.ReservaDTO;
 import com.example.proyecto.dto.ReservaRequestDTO;
+import com.example.proyecto.email.events.*;
 import com.example.proyecto.exception.ConflictException;
 import com.example.proyecto.exception.ResourceNotFoundException;
 import com.example.proyecto.infrastructure.ClienteRepository;
@@ -14,6 +15,7 @@ import com.example.proyecto.infrastructure.ServicioRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +33,7 @@ public class ReservaService {
     private final ServicioService servicioService;
     private final ModelMapper modelMapper;
     private final ServicioRepository servicioRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public List<ReservaDTO> obtenerReservasPorProveedorYEstados(Long proveedorId, List<EstadoReserva> estados) {
         List<Reserva> reservas = reservaRepository.findByServicioProveedorIdAndEstadoIn(proveedorId, estados);
@@ -51,6 +54,11 @@ public class ReservaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada: " + reservaId));
         reserva.setEstado(EstadoReserva.ACEPTADA);
         Reserva updated = reservaRepository.save(reserva);
+        eventPublisher.publishEvent(new AcceptReservaEvent(this, updated.getCliente().getNombre(),
+                updated.getCliente().getUser().getEmail(),
+                updated.getServicio().getProveedor().getNombre(),
+                updated.getFechaReserva(),
+                updated.getServicio().getNombre()));
         return modelMapper.map(updated, ReservaDTO.class);
     }
 
@@ -59,6 +67,12 @@ public class ReservaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada: " + reservaId));
         reserva.setEstado(EstadoReserva.COMPLETADA);
         Reserva updated = reservaRepository.save(reserva);
+        // Enviar correo a cliente
+        eventPublisher.publishEvent(new CompleteReservaEvent(this, reserva.getCliente().getNombre(),
+                reserva.getCliente().getUser().getEmail(),
+                reserva.getServicio().getProveedor().getUser().getEmail(),
+                reserva.getFechaReserva(),
+                reserva.getServicio().getNombre()));
         return modelMapper.map(updated, ReservaDTO.class);
     }
 
@@ -74,6 +88,13 @@ public class ReservaService {
         reserva.setDireccion(dto.getDireccion());
         reserva.setEstado(EstadoReserva.PENDIENTE);
         reservaRepository.save(reserva);
+        // Enviar correo al cliente al solicitar una reserva (pero aún no hace el pago)
+        eventPublisher.publishEvent(new CreateReservaEvent(this, reserva.getCliente().getNombre(),
+                reserva.getServicio().getProveedor().getUser().getEmail(),
+                reserva.getServicio().getProveedor().getNombre(),
+                reserva.getFechaReserva(),
+                reserva.getDireccion(),
+                reserva.getServicio().getNombre()));
         return modelMapper.map(reserva, ReservaDTO.class);
     }
 
@@ -92,6 +113,24 @@ public class ReservaService {
         }
         reserva.setEstado(EstadoReserva.CANCELADA);
         reservaRepository.save(reserva);
+
+        // Enviar email
+        if (reserva.getCliente().getId().equals(userId)) {
+            eventPublisher.publishEvent(new CancelReservaEvent(this,reserva.getCliente().getNombre(),
+                    reserva.getServicio().getProveedor().getUser().getEmail(),
+                    reserva.getServicio().getProveedor().getNombre(),
+                    reserva.getFechaReserva(),
+                    reserva.getServicio().getNombre()
+            ));
+        }
+        if (reserva.getServicio().getProveedor().getId().equals(userId)){
+            eventPublisher.publishEvent(new RejectReservaEvent(this, reserva.getCliente().getNombre(),
+                    reserva.getCliente().getUser().getEmail(),
+                    reserva.getServicio().getProveedor().getNombre(),
+                    reserva.getFechaReserva(),
+                    reserva.getServicio().getNombre()
+            ));
+        }
     }
 
     public List<ReservaDTO> misReservas(Long clienteId) {
