@@ -74,6 +74,7 @@ Controller → Service → Entities → Database
 - **Docker 20.10** → despliegue idéntico en cualquier servidor.
 ---
 ## Modelo de Entidades
+![Entity-Relationship Diagram](docs/diagrama-entidades.png)
 La capa de dominio incluye las siguientes entidades principales:
 
 * **User** (base): `id`, `nombre`, `email`, `password`, `roles`.
