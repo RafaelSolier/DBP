@@ -78,15 +78,11 @@ public class DisponibilidadService {
                 .orElseThrow(() -> new ResourceNotFoundException("Disponibilidad no encontrada: " + id));
         disponibilidadRepository.delete(existing);
     }
-  //Para obtener el horario de un servicio específico
+    // Para obtener el horario de un servicio específico
     public List<DisponibilidadDTO> obtenerHorarioServicio(Long servicioId) {
         return disponibilidadRepository.findByServicioId(servicioId)
                 .stream()
-                .map(d -> new DisponibilidadDTO(
-                        d.getId(),
-                        d.getDiaSemana(),
-                        d.getHoraInicio(),
-                        d.getHoraFin()))
+                .map(d -> modelMapper.map(d, DisponibilidadDTO.class))
                 .collect(Collectors.toList());
     }
 
