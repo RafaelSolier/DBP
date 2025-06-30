@@ -19,5 +19,12 @@ public class DisponibilidadDTO {
     @NotNull
     private LocalTime horaFin;
 
+    public DisponibilidadDTO(Long id, DiaSemana diaSemana, LocalTime horaInicio, LocalTime horaFin) {
+        this.id = id;
+        this.diaSemana = diaSemana;
+        this.horaInicio = horaInicio;
+        this.horaFin = horaFin;
+    }
+
     // Getters y setters
 }

@@ -67,4 +67,25 @@ public class ProveedorController {
         ReservaDTO reserva = reservaService.completarReserva(resId);
         return ResponseEntity.ok(reserva);
     }
+
+    @PatchMapping("/servicios/{id}/estado")
+    public ResponseEntity<ServicioDTO> cambiarEstado(
+            @PathVariable Long id,
+            @RequestParam boolean activo) {
+        ServicioDTO updated = servicioService.cambiarEstado(id, activo);
+        return ResponseEntity.ok(updated);
+    }
+    @GetMapping("/servicios/activos")
+    public ResponseEntity<List<ServicioDTO>> listarServiciosActivos() {
+        List<ServicioDTO> servicios = servicioService.listarServiciosActivos();
+        return ResponseEntity.ok(servicios);
+    }
+
+    @GetMapping("/servicios/{proveedorId}/servicios")
+    public ResponseEntity<List<ServicioDTO>> listarServiciosProveedor(
+            @PathVariable Long proveedorId) {
+        return ResponseEntity.ok(
+                servicioService.listarServiciosPorProveedor(proveedorId)
+        );
+    }
 }

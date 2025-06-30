@@ -10,6 +10,7 @@ public class ServicioDTO {
     private String nombre;
     private String descripcion;
     private BigDecimal precio;
+    private boolean activo;
     private String categoria;
     private Long proveedorId;
 }

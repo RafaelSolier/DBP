@@ -24,6 +24,9 @@ public class Servicio {
     @Column(nullable = false)
     private BigDecimal precio;
 
+    @Column(nullable = false)
+    private boolean activo = true;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Categorias categoria;

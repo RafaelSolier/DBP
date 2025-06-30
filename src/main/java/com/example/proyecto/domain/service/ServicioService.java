@@ -16,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.persistence.criteria.Predicate;
@@ -88,4 +90,38 @@ public class ServicioService {
                 .map(srv -> modelMapper.map(srv, ServicioDTO.class))
                 .collect(Collectors.toList());
     }
+
+    //Listas servicios activos
+    public List<ServicioDTO> listarServiciosActivos() {
+        return servicioRepository.findByActivoTrue()
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+    public List<ServicioDTO> listarServiciosPorProveedor(Long proveedorId) {
+        return servicioRepository.findByProveedorId(proveedorId)
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    //Cambiar estado de un servicio
+    public ServicioDTO cambiarEstado(Long servicioId, boolean activo) {
+        Servicio srv = servicioRepository.findById(servicioId)
+                .orElseThrow(() -> new IllegalArgumentException("Servicio no encontrado"));
+        srv.setActivo(activo);
+        return toDTO(servicioRepository.save(srv));
+    }
+
+   private ServicioDTO toDTO(Servicio s) {
+       ServicioDTO dto = new ServicioDTO();
+       dto.setId(s.getId());
+       dto.setNombre(s.getNombre());
+       dto.setDescripcion(s.getDescripcion());
+       dto.setPrecio(s.getPrecio());
+       dto.setActivo(s.isActivo());
+       dto.setCategoria(s.getCategoria().name());
+       dto.setProveedorId(s.getProveedor().getId());
+       return dto;
+   }
 }
