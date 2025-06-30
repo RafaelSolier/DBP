@@ -88,4 +88,10 @@ public class ProveedorController {
                 servicioService.listarServiciosPorProveedor(proveedorId)
         );
     }
+
+    @DeleteMapping("/servicios/{id}")
+    public ResponseEntity<Void> eliminarServicio(@PathVariable Long id) {
+        servicioService.eliminarServicio(id);
+        return ResponseEntity.ok().build();
+    }
 }

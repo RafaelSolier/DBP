@@ -113,6 +113,14 @@ public class ServicioService {
         return toDTO(servicioRepository.save(srv));
     }
 
+    public boolean eliminarServicio(Long servicioId) {
+        if (servicioRepository.existsById(servicioId)) {
+            servicioRepository.deleteById(servicioId);
+            return true;
+        }
+        return false;
+    }
+
    private ServicioDTO toDTO(Servicio s) {
        ServicioDTO dto = new ServicioDTO();
        dto.setId(s.getId());
