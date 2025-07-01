@@ -105,9 +105,6 @@ public class ReservaService {
         if (!reserva.getCliente().getId().equals(userId)) {
             throw new ConflictException("No autorizado para cancelar esta reserva");
         }
-        if (!reserva.getServicio().getProveedor().getId().equals(userId)){
-            throw new ConflictException("No autorizado para cancelar esta reserva");
-        }
         if (reserva.getEstado() != EstadoReserva.PENDIENTE) {
             throw new ConflictException("Solo reservas pendientes pueden cancelarse");
         }
