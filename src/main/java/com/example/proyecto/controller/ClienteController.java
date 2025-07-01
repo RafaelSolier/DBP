@@ -64,4 +64,13 @@ public class ClienteController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/clientes/{id}")
+    public ResponseEntity<ClienteResponseDto> actualizarCliente(
+            @PathVariable Long id,
+            @Valid @RequestBody ClienteUpdateDTO dto
+    ) {
+        ClienteResponseDto clienteActualizado = clienteService.actualizarCliente(id, dto);
+        return ResponseEntity.ok(clienteActualizado);
+    }
 }

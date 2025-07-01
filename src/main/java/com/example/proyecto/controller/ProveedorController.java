@@ -95,9 +95,18 @@ public class ProveedorController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/proveedor/{id}")
+    @DeleteMapping("/proveedores/{id}")
     public ResponseEntity<Void> eliminarProveedor(@PathVariable Long id) {
         proveedorService.eliminarProveedor(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/proveedores/{id}")
+    public ResponseEntity<ProveedorResponseDTO> actualizarProveedor(
+            @PathVariable Long id,
+            @Valid @RequestBody ProveedorUpdateDTO dto
+    ) {
+        ProveedorResponseDTO proveedorActualizado = proveedorService.actualizarProveedor(id, dto);
+        return ResponseEntity.ok(proveedorActualizado);
     }
 }

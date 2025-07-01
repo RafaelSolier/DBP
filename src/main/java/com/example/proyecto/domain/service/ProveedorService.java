@@ -1,10 +1,10 @@
 package com.example.proyecto.domain.service;
 
-import com.example.proyecto.domain.entity.Cliente;
 import com.example.proyecto.domain.entity.Proveedor;
 import com.example.proyecto.domain.entity.Reserva;
 import com.example.proyecto.domain.entity.Servicio;
-import com.example.proyecto.dto.ProveedorRequestDto;
+import com.example.proyecto.dto.ProveedorResponseDTO;
+import com.example.proyecto.dto.ProveedorUpdateDTO;
 import com.example.proyecto.dto.ServicioDTO;
 import com.example.proyecto.dto.ServicioRequestDto;
 import com.example.proyecto.exception.ResourceNotFoundException;
@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -38,6 +37,20 @@ public class ProveedorService {
         servicio.setProveedor(proveedor);
         Servicio savedServicio = servicioRepository.save(servicio);
         return List.of(modelMapper.map(savedServicio, ServicioDTO.class));
+    }
+
+    @Transactional
+    public ProveedorResponseDTO actualizarProveedor(Long proveedorId, ProveedorUpdateDTO dto) {
+        Proveedor proveedor = proveedorRepository.findById(proveedorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Proveedor no encontrado: " + proveedorId));
+
+        // Actualizar campos
+        proveedor.setNombre(dto.getNombre());
+        proveedor.setDescripcion(dto.getDescripcion());
+        proveedor.setTelefono(dto.getTelefono());
+
+        Proveedor proveedorActualizado = proveedorRepository.save(proveedor);
+        return modelMapper.map(proveedorActualizado, ProveedorResponseDTO.class);
     }
 
     @Transactional

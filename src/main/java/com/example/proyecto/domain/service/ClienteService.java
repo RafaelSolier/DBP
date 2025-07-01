@@ -47,6 +47,23 @@ public class ClienteService {
     }
 
     @Transactional
+    public ClienteResponseDto actualizarCliente(Long clienteId, ClienteUpdateDTO dto) {
+        Cliente cliente = clienteRepository.findById(clienteId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado: " + clienteId));
+
+        // Actualizar campos
+        cliente.setNombre(dto.getNombre());
+        cliente.setApellido(dto.getApellido());
+        cliente.setTelefono(dto.getTelefono());
+        if (dto.getFoto() != null) {
+            cliente.setFoto(dto.getFoto());
+        }
+
+        Cliente clienteActualizado = clienteRepository.save(cliente);
+        return clienteActualizado.toResponseDto();
+    }
+
+    @Transactional
     public void eliminarCliente(Long clienteId) {
         Cliente cliente = clienteRepository.findById(clienteId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado: " + clienteId));
