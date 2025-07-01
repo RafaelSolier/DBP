@@ -46,7 +46,13 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        // Rutas públicas de autenticación
+                        .requestMatchers("/auth/register/**", "/auth/login").permitAll()
+                        // Ruta /auth/me requiere autenticación
+                        .requestMatchers("/auth/me").authenticated()
+                        // Documentación API
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        // Rutas específicas por rol
                         .requestMatchers("/api/clientes/**","/api/pagos/**","/api/resenas").hasRole("CLIENTE")
                         .requestMatchers("/api/proveedores/**").hasRole("PROVEEDOR")
                         .requestMatchers("/api/servicios/**").hasAnyRole("CLIENTE", "PROVEEDOR")
@@ -71,7 +77,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         var cfg = new CorsConfiguration();
-        cfg.setAllowedOrigins(List.of("http://localhost:5173"));
+        cfg.setAllowedOrigins(List.of("http://localhost:5174"));
         cfg.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
         cfg.setAllowedHeaders(List.of("*"));
         var src = new UrlBasedCorsConfigurationSource();
