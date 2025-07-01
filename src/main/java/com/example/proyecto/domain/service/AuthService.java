@@ -5,12 +5,10 @@ import com.example.proyecto.domain.entity.Cliente;
 import com.example.proyecto.domain.entity.Proveedor;
 import com.example.proyecto.domain.entity.User;
 import com.example.proyecto.domain.enums.Role;
-import com.example.proyecto.dto.AuthResponseDto;
-import com.example.proyecto.dto.ClienteRequestDTO;
-import com.example.proyecto.dto.LoginDTO;
-import com.example.proyecto.dto.ProveedorRequestDto;
+import com.example.proyecto.dto.*;
 import com.example.proyecto.email.events.WelcomeEmailEvent;
 import com.example.proyecto.exception.ConflictException;
+import com.example.proyecto.exception.ResourceNotFoundException;
 import com.example.proyecto.exception.UnauthorizedException;
 import com.example.proyecto.infrastructure.ClienteRepository;
 import com.example.proyecto.infrastructure.ProveedorRepository;
@@ -23,6 +21,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -114,6 +115,43 @@ public class AuthService {
             return new AuthResponseDto(token, proveedor.getId());
         } else {
             throw new UnauthorizedException("Rol no válido");
+        }
+    }
+
+    @Transactional
+    public AuthMeDto getCurrentUserInfo(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+
+        Set<String> roles = user.getRoles().stream()
+                .map(Role::name)
+                .collect(Collectors.toSet());
+
+        if (user.getRoles().contains(Role.ROLE_CLIENTE)) {
+            Cliente cliente = clienteRepository.findByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado"));
+
+            AuthMeDto dto = new AuthMeDto();
+            dto.setId(user.getId());
+            dto.setNombre(cliente.getNombre());
+            dto.setEmail(user.getEmail());
+            dto.setTelefono(cliente.getTelefono());
+            dto.setRole(roles);
+            return dto;
+
+        } else if (user.getRoles().contains(Role.ROLE_PROVEEDOR)) {
+            Proveedor proveedor = proveedorRepository.findByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("Proveedor no encontrado"));
+
+            AuthMeDto dto = new AuthMeDto();
+            dto.setId(user.getId());
+            dto.setNombre(proveedor.getNombre());
+            dto.setEmail(user.getEmail());
+            dto.setTelefono(proveedor.getTelefono());
+            dto.setRole(roles);
+            return dto;
+        } else {
+            throw new UnauthorizedException("Tipo de usuario no válido");
         }
     }
 }
