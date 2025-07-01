@@ -1,10 +1,11 @@
 package com.example.proyecto.domain.service;
 
 import com.example.proyecto.domain.entity.Cliente;
+import com.example.proyecto.domain.entity.Resena;
 import com.example.proyecto.dto.*;
 import com.example.proyecto.exception.ResourceNotFoundException;
-import com.example.proyecto.infrastructure.ClienteRepository;
-import com.example.proyecto.infrastructure.ReservaRepository;
+import com.example.proyecto.infrastructure.*;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,21 +18,20 @@ import java.util.List;
 public class ClienteService {
 
     private final ClienteRepository clienteRepository;
-    private final ModelMapper modelMapper;
-    private final PasswordEncoder passwordEncoder;
     private final ServicioService servicioService;
     private final ReservaService reservaService;
     private final ReservaRepository reservaRepository;
+    private final PagoRepository pagoRepository;
+    private final ResenaRepository resenaRepository;
+    private final UserRepository userRepository;
 
     public Cliente findById(Long id) {
         return clienteRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado "+ id));
     }
 
-
     public List<ServicioDTO> buscarServicios(FiltroServicioDTO filtros) {
         return servicioService.buscarServicios(filtros);
     }
-
 
     public void cancelarReserva(Long clienteId, Long reservaId) {
         reservaService.cancelarReserva(clienteId, reservaId);
@@ -44,6 +44,29 @@ public class ClienteService {
 
         // 2) Si existe, delegar a ReservaService
         return reservaService.misReservas(clienteId);
+    }
+
+    @Transactional
+    public void eliminarCliente(Long clienteId) {
+        Cliente cliente = clienteRepository.findById(clienteId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado: " + clienteId));
+
+        // Eliminar pagos, reservas y reseñas asociadas al cliente
+        cliente.getReservas().forEach(reserva -> {
+            System.out.print("reserva " + reserva.getEstado());
+            if (reserva.getPago() != null) {
+
+                pagoRepository.delete(reserva.getPago());
+            }
+            reservaRepository.delete(reserva);
+        });
+            cliente.getResenas().forEach(resena -> resenaRepository.delete(resena));
+
+        // Finalmente, eliminar el cliente
+        clienteRepository.delete(cliente);
+
+        // Eliminar usuario asociado al cliente
+        userRepository.delete(cliente.getUser());
     }
 
 }

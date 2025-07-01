@@ -11,4 +11,7 @@ import java.util.List;
 public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     List<Reserva> findByClienteId(Long clienteId);
     List<Reserva> findByServicioProveedorIdAndEstadoIn(Long proveedorId, List<EstadoReserva> estado);
+    void deleteByClienteId(Long clienteId);
+
+    List<Reserva> getByServicioId(Long servicioId);
 }

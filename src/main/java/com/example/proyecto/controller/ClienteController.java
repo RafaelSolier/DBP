@@ -29,6 +29,7 @@ public class ClienteController {
         return ResponseEntity.ok(servicios);
     }
 
+
     @PostMapping("/clientes/{clienteId}/reservas")
     public ResponseEntity<ReservaDTO> crearReserva(
             @PathVariable Long clienteId,
@@ -39,10 +40,10 @@ public class ClienteController {
     }
 
     @PatchMapping("/clientes/{id}/reservas/{resId}/cancelar")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void cancelarReserva(@PathVariable Long id,
+    public ResponseEntity<Void> cancelarReserva(@PathVariable Long id,
                                 @PathVariable Long resId) {
         clienteService.cancelarReserva(id, resId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/clientes/{id}/reservas")
@@ -57,4 +58,10 @@ public class ClienteController {
         return ResponseEntity.ok(cliente);
     }
 
+    @DeleteMapping("/clientes/{id}")
+    public ResponseEntity<Void> eliminarCliente(@PathVariable Long id) {
+        clienteService.eliminarCliente(id);
+
+        return ResponseEntity.noContent().build();
+    }
 }

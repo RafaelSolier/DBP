@@ -40,7 +40,7 @@ public class ServicioService {
         existing.setNombre(dto.getNombre());
         existing.setDescripcion(dto.getDescripcion());
         existing.setPrecio(dto.getPrecio());
-        Categorias categoriaDto = Categorias.valueOf(dto.getCategoria());   // Puede desencadenar un IllegalArgumentException si no coincide con alguno
+        Categorias categoriaDto = Categorias.valueOf(dto.getCategoria());
         existing.setCategoria(categoriaDto);
         servicioRepository.save(existing);
     }

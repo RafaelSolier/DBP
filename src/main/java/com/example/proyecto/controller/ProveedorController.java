@@ -89,9 +89,15 @@ public class ProveedorController {
         );
     }
 
-    @DeleteMapping("/servicios/{id}")
+    @DeleteMapping("/servicios/proveedor/{id}")
     public ResponseEntity<Void> eliminarServicio(@PathVariable Long id) {
         servicioService.eliminarServicio(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/proveedor/{id}")
+    public ResponseEntity<Void> eliminarProveedor(@PathVariable Long id) {
+        proveedorService.eliminarProveedor(id);
         return ResponseEntity.ok().build();
     }
 }

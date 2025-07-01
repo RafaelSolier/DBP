@@ -18,7 +18,7 @@ public class Pago {
     @Column(nullable = false)
     private BigDecimal monto;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDateTime fechaPago = LocalDateTime.now();
 
     @Enumerated(EnumType.STRING)
