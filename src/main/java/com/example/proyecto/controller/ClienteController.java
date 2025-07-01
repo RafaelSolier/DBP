@@ -50,4 +50,11 @@ public class ClienteController {
         List<ReservaDTO> reservas = clienteService.misReservas(id);
         return ResponseEntity.ok(reservas);
     }
+
+    @GetMapping("/servicios/clientes/{id}")
+    public ResponseEntity<ClienteResponseDto> obtenerCliente(@PathVariable Long id) {
+        ClienteResponseDto cliente = clienteService.findById(id).toResponseDto();
+        return ResponseEntity.ok(cliente);
+    }
+
 }

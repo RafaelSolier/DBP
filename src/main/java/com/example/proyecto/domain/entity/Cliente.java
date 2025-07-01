@@ -1,5 +1,6 @@
 package com.example.proyecto.domain.entity;
 
+import com.example.proyecto.dto.ClienteResponseDto;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -38,4 +39,12 @@ public class Cliente {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
     // getters y setters
+    public ClienteResponseDto toResponseDto() {
+        ClienteResponseDto responseDto = new ClienteResponseDto();
+        responseDto.setId(this.getId());
+        responseDto.setNombre(this.getNombre());
+        responseDto.setApellido(this.getApellido());
+        responseDto.setTelefono(this.getTelefono());
+        return responseDto;
+    }
 }
