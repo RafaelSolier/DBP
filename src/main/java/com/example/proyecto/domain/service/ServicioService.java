@@ -121,6 +121,9 @@ public class ServicioService {
         return false;
     }
 
+    public List<Categorias> listarCategorias() {
+        return Categorias.listarCategorias();
+    }
    private ServicioDTO toDTO(Servicio s) {
        ServicioDTO dto = new ServicioDTO();
        dto.setId(s.getId());

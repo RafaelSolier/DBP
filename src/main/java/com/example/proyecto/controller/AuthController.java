@@ -40,7 +40,6 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<AuthMeDto> getCurrentUser(Principal principal) {
         String email = principal.getName();
-        System.out.println(email);
         AuthMeDto userInfo = authService.getCurrentUserInfo(email);
         return ResponseEntity.ok(userInfo);
     }

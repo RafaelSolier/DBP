@@ -70,7 +70,6 @@ public class ClienteService {
 
         // Eliminar pagos, reservas y reseñas asociadas al cliente
         cliente.getReservas().forEach(reserva -> {
-            System.out.print("reserva " + reserva.getEstado());
             if (reserva.getPago() != null) {
 
                 pagoRepository.delete(reserva.getPago());

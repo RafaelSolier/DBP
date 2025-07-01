@@ -137,6 +137,8 @@ public class AuthService {
             dto.setEmail(user.getEmail());
             dto.setTelefono(cliente.getTelefono());
             dto.setRole(roles);
+            dto.setDescripcion("");
+
             return dto;
 
         } else if (user.getRoles().contains(Role.ROLE_PROVEEDOR)) {
@@ -149,6 +151,7 @@ public class AuthService {
             dto.setEmail(user.getEmail());
             dto.setTelefono(proveedor.getTelefono());
             dto.setRole(roles);
+            dto.setDescripcion(proveedor.getDescripcion());
             return dto;
         } else {
             throw new UnauthorizedException("Tipo de usuario no válido");
